@@ -13,17 +13,31 @@ import java.util.Set;
 public class PeerController {
     static Set<Peer> peers = new HashSet<>();
 
+    public List<Peer> getPeers() {
+        return new ArrayList<>(peers);
+    }
+
     public List<Peer> addPeer(Peer peer) {
         try {
             RestTemplate restTemplate = new RestTemplate();
             Node node = restTemplate.getForObject("http://" + peer.getUrl() + "/info", Node.class);
+
+            this.addMeAsPeer(peer);
+
+            peers.add(peer);
+
+            return new ArrayList<>(peers);
         } catch (final HttpClientErrorException e) {
             System.out.println("Node not available");
             System.out.println(e.getMessage());
         }
 
-        peers.add(peer);
-        return new ArrayList<>(peers);
+        return null;
+    }
+
+    private void addMeAsPeer(Peer peer) {
+
+
     }
 }
 
