@@ -15,12 +15,14 @@ public class PeerControler {
 
     public void addPeer(Peer peer) {
 
-        RestTemplate restTemplate = new RestTemplate();
-        Peer[] requestedPeers = restTemplate.postForObject("http://" + peer.getUrl() + "/peers", new Peer(ip), Peer[].class);
+        if (!peers.contains(peer)) {
+            RestTemplate restTemplate = new RestTemplate();
+            Peer[] requestedPeers = restTemplate.postForObject("http://" + peer.getUrl() + "/peers", new Peer(ip), Peer[].class);
 
-        if (requestedPeers != null && requestedPeers.length > 0) {
-            peers.addAll(new ArrayList<>(Arrays.asList(requestedPeers)));
+            if (requestedPeers != null && requestedPeers.length > 0) {
+                peers.addAll(new ArrayList<>(Arrays.asList(requestedPeers)));
+            }
+            peers.add(peer);
         }
-        peers.add(peer);
     }
 }
