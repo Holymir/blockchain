@@ -4,6 +4,13 @@ public class Peer {
 
     private String url;
 
+    public Peer() {
+    }
+
+    public Peer(String url) {
+        this.url = url;
+    }
+
     public String getUrl() {
         return url;
     }
