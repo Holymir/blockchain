@@ -10,7 +10,7 @@ import java.util.List;
 public class NodeHandler {
 
     @Autowired
-    private PeerControler pr;
+    private PeerController pr;
 
     @GetMapping("/info")
     public Node nodeInfo() {
@@ -40,10 +40,7 @@ public class NodeHandler {
 
     @PostMapping("/peers")
     public List<Peer> peer(@RequestBody Peer peer) {
-
-        //this.pr.ping(peer);
-        this.pr.addPeer(peer);
-        return new ArrayList<>(PeerControler.peers);
+        return this.pr.addPeer(peer);
     }
 
     @GetMapping("/balance")
