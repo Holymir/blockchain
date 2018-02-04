@@ -1,9 +1,13 @@
 package com.softuni.blockchain.wallet;
 
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
+
+import static org.apache.commons.codec.digest.DigestUtils.sha256;
 
 
 @Component
