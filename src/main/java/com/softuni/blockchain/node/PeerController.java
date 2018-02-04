@@ -18,6 +18,10 @@ public class PeerController {
         this.me = new Peer("192.168.0.11:8008");
     }
 
+    public List<Peer> getPeers() {
+        return new ArrayList<>(peers);
+    }
+
     public List<Peer> addPeer(Peer peer) {
         try {
             RestTemplate restTemplate = new RestTemplate();
