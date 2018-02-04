@@ -1,6 +1,10 @@
 package com.softuni.blockchain.node;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class NodeHandler {
@@ -35,11 +39,11 @@ public class NodeHandler {
     }
 
     @PostMapping("/peers")
-    public Peer peer(@RequestBody Peer peer) {
+    public List<Peer> peer(@RequestBody Peer peer) {
 
         //this.pr.ping(peer);
         this.pr.addPeer(peer);
-        return peer;
+        return new ArrayList<>(PeerControler.peers);
     }
 
     @GetMapping("/balance")
