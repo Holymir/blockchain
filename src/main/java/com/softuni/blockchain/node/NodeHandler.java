@@ -1,6 +1,7 @@
 package com.softuni.blockchain.node;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 public class NodeHandler {
 
     @Autowired
-    private PeerController pr;
+    private PeerController peerController;
 
     @GetMapping("/info")
     public Node nodeInfo() {
@@ -25,7 +26,7 @@ public class NodeHandler {
 
     @GetMapping("/blocks/{index}")
     public Block block(@PathVariable Integer index) {
-        Block block =  new Block();
+        Block block = new Block();
         block.setIndex(index);
 
         return block;
@@ -34,12 +35,13 @@ public class NodeHandler {
     @GetMapping("/peers")
     public List<Peer> peer() {
 
-        return pr.getPeers();
+        return peerController.getPeers();
     }
 
     @PostMapping("/peers")
-    public List<Peer> peer(@RequestBody Peer peer) {
-        return this.pr.addPeer(peer);
+    public ResponseEntity peer(@RequestBody Peer peer) {
+        this.peerController.addPeer(peer);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/balance")
@@ -50,7 +52,7 @@ public class NodeHandler {
 
     @GetMapping("/transactions/{transactionHashId}/info")
     public Transaction transaction(@PathVariable String transactionHashId) {
-        Transaction transaction =  new Transaction();
+        Transaction transaction = new Transaction();
         transaction.setTransactionHash(transactionHashId);
 
         return transaction;
