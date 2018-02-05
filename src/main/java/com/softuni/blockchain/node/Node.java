@@ -1,21 +1,47 @@
 package com.softuni.blockchain.node;
 
-import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+@Component
 public class Node {
 
-    private List<Peer> peers;
+    private String uuid;
+    private String about;
+    private Set<Peer> peers;
     private List<Block> blocks;
     private List<Transaction> transactions;
     private Balance balance;
     private int difficulty;
     private MiningJob miningJobs;
 
-    public List<Peer> getPeers() {
+    public Node() {
+        this.uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
+        this.peers = PeerController.peers.keySet();
+        this.transactions = NodeController.pendingTransactions;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public String getAbout() {
+        return about;
+    }
+
+    public void setAbout(String about) {
+        this.about = about;
+    }
+
+    public Set<Peer> getPeers() {
         return peers;
     }
 
-    public void setPeers(List<Peer> peers) {
+    public void setPeers(Set<Peer> peers) {
         this.peers = peers;
     }
 

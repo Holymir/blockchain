@@ -1,5 +1,6 @@
 package com.softuni.blockchain.node;
 
+import com.softuni.blockchain.wallet.Wallet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +13,12 @@ public class NodeHandler {
     @Autowired
     private PeerController peerController;
 
+    @Autowired
+    private NodeController nodeController;
+
     @GetMapping("/info")
     public Node nodeInfo() {
-
-        return new Node();
+        return nodeController.getInfo();
     }
 
     @GetMapping("/blocks")
@@ -58,4 +61,8 @@ public class NodeHandler {
         return transaction;
     }
 
+    @PostMapping("/transactions")
+    public Transaction createTransaction(@RequestBody RequestTransactionDTO transactionDTO) {
+        return this.nodeController.createTransaction(transactionDTO.getTransaction(), transactionDTO.getWallet());
+    }
 }

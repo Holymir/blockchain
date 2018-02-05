@@ -4,13 +4,13 @@ public class Transaction {
 
     private String from;            //address
     private String to;              //address
-    private double value;           //number
+    private Double value;           //number
     private String senderPubKey;    //hex_number
     private String senderSignature; //hex_number[2]
     private String transactionHash; //hex_number
-    private long dateReceived;      //timestamp
-    private int minedInBlockIndex;  //number
-    private boolean paid;           //bool
+    private Long dateReceived;      //timestamp
+    private Integer minedInBlockIndex;  //number
+    private Boolean paid;           //bool
 
     public String getFrom() {
         return from;
@@ -28,11 +28,11 @@ public class Transaction {
         this.to = to;
     }
 
-    public double getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
@@ -60,27 +60,27 @@ public class Transaction {
         this.transactionHash = transactionHash;
     }
 
-    public long getDateReceived() {
+    public Long getDateReceived() {
         return dateReceived;
     }
 
-    public void setDateReceived(long dateReceived) {
+    public void setDateReceived(Long dateReceived) {
         this.dateReceived = dateReceived;
     }
 
-    public int getMinedInBlockIndex() {
+    public Integer getMinedInBlockIndex() {
         return minedInBlockIndex;
     }
 
-    public void setMinedInBlockIndex(int minedInBlockIndex) {
+    public void setMinedInBlockIndex(Integer minedInBlockIndex) {
         this.minedInBlockIndex = minedInBlockIndex;
     }
 
-    public boolean isPaid() {
+    public Boolean getPaid() {
         return paid;
     }
 
-    public void setPaid(boolean paid) {
+    public void setPaid(Boolean paid) {
         this.paid = paid;
     }
 }

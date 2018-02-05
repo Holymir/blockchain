@@ -12,6 +12,9 @@ public class Wallet {
         this.address = address;
     }
 
+    public Wallet() {
+    }
+
     public String getPrivateKey() {
         return privateKey;
     }
