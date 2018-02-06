@@ -1,16 +1,30 @@
 package com.softuni.blockchain.node;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Transaction {
 
     private String from;            //address
     private String to;              //address
     private Double value;           //number
+
+
     private String senderPubKey;    //hex_number
     private String senderSignature; //hex_number[2]
     private String transactionHash; //hex_number
     private Long dateReceived;      //timestamp
     private Integer minedInBlockIndex;  //number
     private Boolean paid;           //bool
+
+    @JsonIgnore
+    public Transaction getCorePart(){
+        Transaction transaction = new Transaction();
+        transaction.setFrom(this.from);
+        transaction.setTo(this.to);
+        transaction.setValue(this.value);
+
+        return transaction;
+    }
 
     public String getFrom() {
         return from;

@@ -1,10 +1,10 @@
 package com.softuni.blockchain.node;
 
-import com.softuni.blockchain.wallet.Wallet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -16,9 +16,12 @@ public class NodeHandler {
     @Autowired
     private NodeController nodeController;
 
+    @Autowired
+    private Node node;
+
     @GetMapping("/info")
-    public Node nodeInfo() {
-        return nodeController.getInfo();
+    public NodeInfo nodeInfo() {
+        return new NodeInfo(node);
     }
 
     @GetMapping("/blocks")
@@ -37,8 +40,7 @@ public class NodeHandler {
 
     @GetMapping("/peers")
     public List<Peer> peer() {
-
-        return peerController.getPeers();
+        return new ArrayList<>(peerController.getPeers().keySet());
     }
 
     @PostMapping("/peers")
@@ -49,11 +51,10 @@ public class NodeHandler {
 
     @GetMapping("/balance")
     public Balance balance() {
-
         return new Balance();
     }
 
-    @GetMapping("/transactions/{transactionHashId}/info")
+    @GetMapping("/node/transactions/{transactionHashId}/info")
     public Transaction transaction(@PathVariable String transactionHashId) {
         Transaction transaction = new Transaction();
         transaction.setTransactionHash(transactionHashId);
@@ -61,8 +62,13 @@ public class NodeHandler {
         return transaction;
     }
 
-    @PostMapping("/transactions")
-    public Transaction createTransaction(@RequestBody RequestTransactionDTO transactionDTO) {
-        return this.nodeController.createTransaction(transactionDTO.getTransaction(), transactionDTO.getWallet());
+    @GetMapping("/node/transactions/pending")
+    public List<Transaction> getPendingTransaction() {
+        return this.nodeController.getPendingTransactions();
+    }
+
+    @PostMapping("/node/transactions")
+    public Transaction createTransaction(@RequestBody Transaction transaction) {
+        return this.nodeController.createTransaction(transaction);
     }
 }

@@ -1,34 +1,35 @@
 package com.softuni.blockchain.node;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-@Component
-public class Node {
-
+public class NodeInfo {
     private String uuid;
     private String about;
-    private Set<Peer> peers;
-    private List<Block> blocks;
-    private List<Transaction> transactions;
+    private long peers;
+    private long blocks;
+    private long transactions;
     private Balance balance;
     private int difficulty;
     private MiningJob miningJobs;
 
-    public Node(PeerController peerController, NodeController nodeController) {
-        this.uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
-        this.peers = peerController.getPeers().keySet();
-        this.blocks = new ArrayList<>();
-        this.transactions = nodeController.getPendingTransactions();
+    public NodeInfo(Node node) {
+        this.uuid = node.getUuid();
+        this.about = node.getAbout();
+        this.peers = node.getPeers().size();
+        this.blocks = node.getBlocks().size();
+        this.transactions = node.getTransactions().size();
+        this.balance = node.getBalance();
+        this.difficulty = node.getDifficulty();
+        this.miningJobs = node.getMiningJobs();
+    }
+
+    public NodeInfo() {
     }
 
     public String getUuid() {
         return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getAbout() {
@@ -39,27 +40,27 @@ public class Node {
         this.about = about;
     }
 
-    public Set<Peer> getPeers() {
+    public long getPeers() {
         return peers;
     }
 
-    public void setPeers(Set<Peer> peers) {
+    public void setPeers(long peers) {
         this.peers = peers;
     }
 
-    public List<Block> getBlocks() {
+    public long getBlocks() {
         return blocks;
     }
 
-    public void setBlocks(List<Block> blocks) {
+    public void setBlocks(long blocks) {
         this.blocks = blocks;
     }
 
-    public List<Transaction> getTransactions() {
+    public long getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(List<Transaction> transactions) {
+    public void setTransactions(long transactions) {
         this.transactions = transactions;
     }
 

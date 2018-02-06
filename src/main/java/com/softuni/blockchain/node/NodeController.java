@@ -2,8 +2,9 @@ package com.softuni.blockchain.node;
 
 
 import com.softuni.blockchain.utils.Utils;
-import com.softuni.blockchain.wallet.Wallet;
+import com.softuni.blockchain.wallet.Crypto;
 import com.softuni.blockchain.wallet.WalletController;
+import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,38 +15,29 @@ import java.util.List;
 @Component
 public class NodeController {
 
-    public static List<Transaction> pendingTransactions = new ArrayList<>();
+    private List<Transaction> pendingTransactions = new ArrayList<>();
 
     @Autowired
     private WalletController walletController;
 
-    @Autowired
-    private Node node;
-
-    public Node getInfo() {
-        return node;
-    }
-
-    public Transaction createTransaction(Transaction transaction, Wallet wallet) {
-        // 1. validateTransaction
-        this.validateTransaction(transaction);
-
-        // 2. sign
-        String signMessage = walletController.signMessage(Utils.serialize(transaction), wallet.getPrivateKey());
-        transaction.setSenderPubKey(wallet.getPublicKey());
-        transaction.setSenderSignature(signMessage);
+    public Transaction createTransaction(Transaction transaction) {
+        // 1. validate Transaction
+        this.verifyTransaction(transaction.getCorePart());
 
         // 3. add to pending transactions
         pendingTransactions.add(transaction);
 
         transaction.setDateReceived(Instant.now().toEpochMilli());
-
-        // 4. pass to pull for mining
+        transaction.setTransactionHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(transaction).getBytes())));
 
         return transaction;
     }
 
-    private void validateTransaction(Transaction transaction) {
+    private void verifyTransaction(Transaction transaction) {
+        this.walletController.verify(Utils.serialize(transaction), transaction.getSenderSignature(), transaction.getSenderPubKey());
+    }
 
+    public List<Transaction> getPendingTransactions() {
+        return this.pendingTransactions;
     }
 }

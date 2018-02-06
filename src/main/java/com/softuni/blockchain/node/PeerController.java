@@ -9,17 +9,15 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
 public class PeerController {
-    public static Map<Peer, WebSocketSession> peers = new HashMap<>();
+    private Map<Peer, WebSocketSession> peers = new HashMap<>();
 
-    public List<Peer> getPeers() {
-        return new ArrayList<>(peers.keySet());
+    public Map<Peer, WebSocketSession> getPeers() {
+        return peers;
     }
 
     public void addPeer(Peer peer) {

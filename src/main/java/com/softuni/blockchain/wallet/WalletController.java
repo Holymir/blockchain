@@ -1,5 +1,7 @@
 package com.softuni.blockchain.wallet;
 
+import com.softuni.blockchain.node.Transaction;
+import com.softuni.blockchain.utils.Utils;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
@@ -43,7 +45,7 @@ public class WalletController {
         return keyGen.generateKeyPair();
     }
 
-    public String signMessage(String message, String privateKey) {
+    private String signMessage(String message, String privateKey) {
         return Crypto.signMessage(message, new BigInteger(privateKey.replaceFirst("0x", ""), 16));
     }
 
@@ -57,5 +59,13 @@ public class WalletController {
         }
 
         return false;
+    }
+
+    public Transaction createTransaction(Transaction transaction, Wallet wallet) {
+        String signMessage = signMessage(Utils.serialize(transaction.getCorePart()), wallet.getPrivateKey());
+        transaction.setSenderPubKey(wallet.getPublicKey());
+        transaction.setSenderSignature(signMessage);
+
+        return transaction;
     }
 }
