@@ -35,15 +35,15 @@ public class NodeEngine {
     @Scheduled(fixedDelay = 5_000)
     void run() {
 
-        // New block is found
-        if (this.nodeController.isNewBlockIsFound()) {
-            this.nodeController.setNewBlockIsFound(false);
-
-            this.nodeController.getBlockChain().add(this.nodeController.getCandidateBlock());
-            this.nodeController.setCandidateBlock(null);
-
-            this.notifyPeersForNewBlock(this.nodeController.getLastBlock());
-        }
+//        // New block is found
+//        if (this.nodeController.isNewBlockIsFound()) {
+//            this.nodeController.setNewBlockIsFound(false);
+//
+//            this.nodeController.getBlockChain().add(this.nodeController.getCandidateBlock());
+//            this.nodeController.setCandidateBlock(null);
+//
+//            this.notifyPeersForNewBlock(this.nodeController.getLastBlock());
+//        }
 
         // Verify blocks, add to chain if valid, notify peers.
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
@@ -68,15 +68,16 @@ public class NodeEngine {
         Block candidateBlock = new Block();
         candidateBlock.setIndex(this.nodeController.getBlockChain().size());
         candidateBlock.setExpectedReward(fee);
-        candidateBlock.setDifficulty(4);
+        candidateBlock.setDifficulty(5);
         candidateBlock.setBlockDataHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(this.nodeController.getPendingTransactions()).getBytes())));
         candidateBlock.setPrevBlockHash(nodeController.getLastBlock().getBlockHash());
         candidateBlock.setTransactions(this.nodeController.getPendingTransactions());
         this.nodeController.getPendingTransactions().clear();
-
         this.nodeController.setCandidateBlock(candidateBlock);
 
-        minerEngine.mine(candidateBlock);
+        Block minedBlock = minerEngine.mine(candidateBlock);
+        this.nodeController.getUnconfirmedBlocks().add(minedBlock);
+        this.nodeController.setCandidateBlock(null);
     }
 
     private void notifyPeersForNewBlock(Block block) {
