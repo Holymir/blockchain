@@ -21,26 +21,27 @@ public class MinerEngine {
 
         int index = block.getIndex();
         String previousBlockHash = block.getPrevBlockHash();
-        String thisBlockHash = block.getBlockDataHash();
+        String thisDataBlockHash = block.getBlockDataHash();
         Long nextTimestamp = new Date().getTime();
 
-        String nextHash = index + thisBlockHash + previousBlockHash + nextTimestamp + nextTimestamp + nonce;
+        String nextHash = index + thisDataBlockHash + previousBlockHash + nextTimestamp + nonce;
         String hashToCheck = Hex.toHexString(Crypto.sha256(nextHash.getBytes()));
 
         while (!hashToCheck.substring(0, difficulty).equals(generateRepeatingString(difficulty))) {
 
             nextTimestamp = new Date().getTime();
-            nextHash = index + thisBlockHash + previousBlockHash + nextTimestamp + nextTimestamp + nonce;
-            hashToCheck = Hex.toHexString(Crypto.sha256(nextHash.getBytes()));
             nonce++;
+            nextHash = index + thisDataBlockHash + previousBlockHash + nextTimestamp + nonce;
+            hashToCheck = Hex.toHexString(Crypto.sha256(nextHash.getBytes()));
         }
 
         logger.info("HashFound: " + hashToCheck);
 
         Block validBlock = new Block();
+        validBlock.setTransactions(block.getTransactions());
         validBlock.setIndex(index);
         validBlock.setPrevBlockHash(previousBlockHash);
-        validBlock.setBlockDataHash(thisBlockHash);
+        validBlock.setBlockDataHash(thisDataBlockHash);
         validBlock.setDateCreated(nextTimestamp);
         validBlock.setDifficulty(difficulty);
         validBlock.setNonce(nonce);

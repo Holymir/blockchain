@@ -36,7 +36,9 @@ public class NodeController {
     }
 
     public Transaction createTransaction(Transaction transaction) {
-        this.verifyTransaction(transaction.getCorePart());
+        if (!this.verifyTransaction(transaction)) {
+            throw new IllegalArgumentException("NOT VALID TRANSACTION!");
+        }
         this.pendingTransactions.add(transaction);
         transaction.setDateReceived(Instant.now().toEpochMilli());
         transaction.setTransactionHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(transaction).getBytes())));
@@ -44,8 +46,10 @@ public class NodeController {
         return transaction;
     }
 
-    private void verifyTransaction(Transaction transaction) {
-        this.walletController.verify(Utils.serialize(transaction), transaction.getSenderSignature(), transaction.getSenderPubKey());
+    private boolean verifyTransaction(Transaction transaction) {
+//        TODO check logic
+//        return this.walletController.verify(Utils.serialize(transaction.getCorePart()), transaction.getSenderSignature(), transaction.getSenderPubKey());
+        return true;
     }
 
     public List<Transaction> getPendingTransactions() {
@@ -64,13 +68,43 @@ public class NodeController {
         return candidateBlock;
     }
 
+    // VerifyBlock
     public boolean verifyBlock(Block block) {
 
-        if (this.getLastBlock().getIndex() + 1 == block.getIndex()
-                && this.getLastBlock().getBlockHash().equals(block.getBlockHash())) {
-            return true;
+        boolean oldnextIndex = this.getLastBlock().getIndex() + 1 == block.getIndex();
+        boolean oldNewHash = this.getLastBlock().getBlockHash().equals(block.getPrevBlockHash());
+
+        boolean checkTransactionHash = transactionHash(block);
+        boolean checkBlockHash = blockHashChecker(block);
+
+        if (!oldNewHash) {
+            return false;
         }
-        return false;
+        if (!oldnextIndex) {
+            return false;
+        }
+        if (!checkBlockHash) {
+            return false;
+        }
+        if (!checkTransactionHash) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean blockHashChecker(Block block) {
+        String blockHash = block.getIndex() + block.getBlockDataHash() + block.getPrevBlockHash() + block.getDateCreated() + block.getNonce();
+        String hashToCheck = Hex.toHexString(Crypto.sha256(blockHash.getBytes()));
+        return hashToCheck.equals(block.getBlockHash());
+    }
+
+    private boolean transactionHash(Block block) {
+        for (Transaction tr : block.getTransactions()) {
+            if (!verifyTransaction(tr)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public List<Block> getBlockChain() {
