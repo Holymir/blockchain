@@ -65,7 +65,12 @@ public class NodeController {
     }
 
     public boolean verifyBlock(Block block) {
-        return this.getLastBlock().getIndex() + 1 == block.getIndex();
+
+        if (this.getLastBlock().getIndex() + 1 == block.getIndex()
+                && this.getLastBlock().getBlockHash().equals(block.getBlockHash())) {
+            return true;
+        }
+        return false;
     }
 
     public List<Block> getBlockChain() {
