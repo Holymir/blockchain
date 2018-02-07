@@ -25,8 +25,6 @@ public class NodeEngine {
     private final NodeController nodeController;
     private final MinerEngine minerEngine;
 
-    private boolean newBlockIsFound = true;
-
     @Autowired
     public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine) {
         this.peerController = peerController;
@@ -36,11 +34,18 @@ public class NodeEngine {
 
     @Scheduled(fixedDelay = 5_000)
     void run() {
-        if (newBlockIsFound) {
-            this.newBlockIsFound = false;
+
+        // New block is found
+        if (this.nodeController.isNewBlockIsFound()) {
+            this.nodeController.setNewBlockIsFound(false);
+
+            this.nodeController.getBlockChain().add(this.nodeController.getCandidateBlock());
+            this.nodeController.setCandidateBlock(null);
+
             this.notifyPeersForNewBlock(this.nodeController.getLastBlock());
         }
 
+        // Verify blocks, add to chain if valid, notify peers.
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
             this.nodeController.getUnconfirmedBlocks().removeIf(block -> {
                 if (this.nodeController.verifyBlock(block)) {
@@ -51,6 +56,7 @@ public class NodeEngine {
             });
         }
 
+        // Generate block
         if (this.nodeController.getCandidateBlock() == null) {
             this.createCandidateBlock();
         }
@@ -64,6 +70,8 @@ public class NodeEngine {
         candidateBlock.setBlockDataHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(this.nodeController.getPendingTransactions()).getBytes())));
         candidateBlock.setTransactions(this.nodeController.getPendingTransactions());
         this.nodeController.getPendingTransactions().clear();
+
+        this.nodeController.setCandidateBlock(candidateBlock);
 
         minerEngine.mine(candidateBlock);
     }

@@ -12,6 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +46,13 @@ public class PeerController {
             logger.debug(String.format("Peer with address: '%s' added to system.", peer.getUrl()));
             this.getPeers().replace(peer, stompSession);
         }, throwable -> logger.error("Error connecting to peer."));
+    }
+
+    public void remove(Peer peer) throws IOException {
+        WebSocketSession session = this.getPeers().remove(peer);
+        if (session != null) {
+            session.close();
+        }
     }
 
 //    private void addMeAsPeer(Peer peer) {

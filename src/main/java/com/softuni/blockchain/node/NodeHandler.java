@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,12 @@ public class NodeHandler {
     @PostMapping("/peers")
     public ResponseEntity peer(@RequestBody Peer peer) {
         this.peerController.addPeer(peer);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/peers")
+    public ResponseEntity removePeer(@RequestBody Peer peer) throws IOException {
+        this.peerController.remove(peer);
         return ResponseEntity.noContent().build();
     }
 

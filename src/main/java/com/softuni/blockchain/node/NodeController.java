@@ -22,6 +22,7 @@ public class NodeController {
     private Set<Block> unconfirmedBlocks;
     private List<Block> blockChain;
     private Block candidateBlock;
+    private boolean newBlockIsFound;
 
     private final WalletController walletController;
 
@@ -78,5 +79,17 @@ public class NodeController {
         block.setIndex(0);
         block.setBlockHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(block).getBytes())));
         return block;
+    }
+
+    public void setCandidateBlock(Block candidateBlock) {
+        this.candidateBlock = candidateBlock;
+    }
+
+    public boolean isNewBlockIsFound() {
+        return newBlockIsFound;
+    }
+
+    public void setNewBlockIsFound(boolean newBlockIsFound) {
+        this.newBlockIsFound = newBlockIsFound;
     }
 }
