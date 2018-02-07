@@ -1,7 +1,6 @@
 package com.softuni.blockchain.node;
 
 
-import com.softuni.blockchain.miner.MinerEngine;
 import com.softuni.blockchain.utils.Utils;
 import com.softuni.blockchain.wallet.Crypto;
 import com.softuni.blockchain.wallet.WalletController;
@@ -57,7 +56,7 @@ public class NodeController {
         return this.blockChain.get(this.blockChain.size() - 1);
     }
 
-    public Set<Block> getUnconfirmedBlocks() {
+    synchronized public Set<Block> getUnconfirmedBlocks() {
         return this.unconfirmedBlocks;
     }
 

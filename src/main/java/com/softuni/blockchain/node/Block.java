@@ -112,4 +112,15 @@ public class Block {
     public void setBlockHash(String blockHash) {
         this.blockHash = blockHash;
     }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "index=" + index +
+                ", minedBy='" + minedBy + '\'' +
+                ", nonce=" + nonce +
+                ", dateCreated=" + dateCreated +
+                ", blockHash='" + blockHash + '\'' +
+                '}';
+    }
 }

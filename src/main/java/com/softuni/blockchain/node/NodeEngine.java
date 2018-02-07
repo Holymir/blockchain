@@ -48,7 +48,9 @@ public class NodeEngine {
         // Verify blocks, add to chain if valid, notify peers.
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
             this.nodeController.getUnconfirmedBlocks().removeIf(block -> {
+                logger.info(String.format("VERIFY BLOCK: %s", block));
                 if (this.nodeController.verifyBlock(block)) {
+                    logger.info(String.format("ADDING BLOCK: %s TO BLOCKCHAIN", block));
                     this.nodeController.getBlockChain().add(block);
                     this.notifyPeersForNewBlock(block);
                 }
@@ -58,6 +60,7 @@ public class NodeEngine {
 
         // Generate block
         if (this.nodeController.getCandidateBlock() == null) {
+            logger.info("CREATING CANDIDATE...");
             this.createCandidateBlock();
         }
     }
