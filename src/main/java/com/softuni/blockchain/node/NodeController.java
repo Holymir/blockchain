@@ -60,30 +60,16 @@ public class NodeController {
         return this.unconfirmedBlocks;
     }
 
+    public Block getCandidateBlock() {
+        return candidateBlock;
+    }
+
     public boolean verifyBlock(Block block) {
         return this.getLastBlock().getIndex() + 1 == block.getIndex();
     }
 
     public List<Block> getBlockChain() {
         return blockChain;
-    }
-
-    @Autowired
-    private MinerEngine minerEngine;
-
-    public void createCandidateBlock() {
-
-        if (candidateBlock == null) {
-            int fee = 5;
-            candidateBlock = new Block();
-            candidateBlock.setIndex(blockChain.size());
-            candidateBlock.setExpectedReward(fee);
-            candidateBlock.setBlockDataHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(pendingTransactions).getBytes())));
-            candidateBlock.setTransactions(pendingTransactions);
-            pendingTransactions.clear();
-
-            minerEngine.mine(candidateBlock);
-        }
     }
 
     private Block generateGenesisBlock() {
