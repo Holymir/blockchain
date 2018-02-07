@@ -2,6 +2,7 @@ package com.softuni.blockchain.node;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class Block implements Comparable<Block> {
@@ -19,6 +20,9 @@ public class Block implements Comparable<Block> {
     private Long dateCreated;       //timestamp
     private String blockHash;       //hex_number
 
+    public Block() {
+        this.transactions = new LinkedList<>();
+    }
 
     @JsonIgnore
     public Block getBlockForMining() {

@@ -1,5 +1,7 @@
 package com.softuni.blockchain.node;
 
+import java.util.Objects;
+
 public class NodeInfo {
     private String uuid;
     private String about;
@@ -100,5 +102,19 @@ public class NodeInfo {
                 ", difficulty=" + difficulty +
                 ", miningJobs=" + miningJobs +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NodeInfo nodeInfo = (NodeInfo) o;
+        return Objects.equals(uuid, nodeInfo.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(uuid);
     }
 }

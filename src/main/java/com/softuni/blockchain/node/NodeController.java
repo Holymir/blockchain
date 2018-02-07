@@ -22,14 +22,15 @@ public class NodeController {
 
     private final WalletController walletController;
 
-
     @Autowired
     public NodeController(WalletController walletController) {
         this.walletController = walletController;
+
+        this.blockChain = Collections.synchronizedList(new ArrayList<>());
+        this.unconfirmedBlocks = Collections.synchronizedSet(new TreeSet<>());
+
         this.pendingTransactions = new ArrayList<>();
-        this.unconfirmedBlocks = new TreeSet<>();
         this.statuses = new HashSet<>();
-        this.blockChain = new ArrayList<>();
         this.blockChain.add(generateGenesisBlock());
     }
 
@@ -58,7 +59,7 @@ public class NodeController {
         return this.blockChain.get(this.blockChain.size() - 1);
     }
 
-    synchronized public Set<Block> getUnconfirmedBlocks() {
+    public Set<Block> getUnconfirmedBlocks() {
         return this.unconfirmedBlocks;
     }
 

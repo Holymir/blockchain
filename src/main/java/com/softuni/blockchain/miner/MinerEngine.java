@@ -1,6 +1,7 @@
 package com.softuni.blockchain.miner;
 
 import com.softuni.blockchain.node.Block;
+import com.softuni.blockchain.node.Node;
 import com.softuni.blockchain.wallet.Crypto;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class MinerEngine {
         validBlock.setDifficulty(difficulty);
         validBlock.setNonce(nonce);
         validBlock.setBlockHash(hashToCheck);
-        validBlock.setMinedBy("Genady");
+        validBlock.setMinedBy(Node.getUuid());
         return validBlock;
 
     }

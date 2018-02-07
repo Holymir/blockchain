@@ -2,15 +2,15 @@ package com.softuni.blockchain.node;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class Node {
 
     private static final String uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
     private String about;
-    private Set<Peer> peers;
+    private Collection<Peer> peers;
     private List<Block> blocks;
     private List<Transaction> transactions;
     private Balance balance;
@@ -18,12 +18,12 @@ public class Node {
     private MiningJob miningJobs;
 
     public Node(PeerController peerController, NodeController nodeController) {
-        this.peers = peerController.getPeers().keySet();
+        this.peers = peerController.getPeers().values();
         this.blocks = nodeController.getBlockChain();
         this.transactions = nodeController.getPendingTransactions();
     }
 
-    public String getUuid() {
+    public static String getUuid() {
         return uuid;
     }
 
@@ -35,11 +35,11 @@ public class Node {
         this.about = about;
     }
 
-    public Set<Peer> getPeers() {
+    public Collection<Peer> getPeers() {
         return peers;
     }
 
-    public void setPeers(Set<Peer> peers) {
+    public void setPeers(Collection<Peer> peers) {
         this.peers = peers;
     }
 

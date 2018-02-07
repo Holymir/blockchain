@@ -39,7 +39,7 @@ public class NodeHandler {
 
     @GetMapping("/peers")
     public List<Peer> peer() {
-        return new ArrayList<>(peerController.getPeers().keySet());
+        return new ArrayList<>(peerController.getPeers().values());
     }
 
     @PostMapping("/peers")

@@ -9,28 +9,48 @@ import org.springframework.web.socket.*;
 public class SocketHandler implements WebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger("PEER");
+    private ThreadLocal<StringBuilder> partialMessage = new ThreadLocal<>();
     private PeerController peerController;
     private NodeController nodeController;
 
     public SocketHandler(PeerController peerController, NodeController nodeController) {
         this.peerController = peerController;
         this.nodeController = nodeController;
+        this.partialMessage.set(new StringBuilder());
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) {
         logger.info("ESTABLISHED SOCKET CONNECTION TO: " + webSocketSession.getRemoteAddress());
         String url = webSocketSession.getRemoteAddress().toString().replace("/", "");
-        Peer peer = new Peer(url);
 
-        if (!this.peerController.getPeers().containsKey(peer)) {
-            this.peerController.getPeers().put(peer, webSocketSession);
+        Peer peer = new Peer(url);
+        peer.setSessionId(webSocketSession.getId());
+        peer.setSession(webSocketSession);
+
+        if (!this.peerController.getPeers().containsKey(peer.getSessionId())) {
+            this.peerController.getPeers().put(peer.getSessionId(), peer);
         }
     }
 
     @Override
     public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
-        Message message = Utils.deserialize(Message.class, webSocketMessage.getPayload().toString());
+        StringBuilder stringBuilder = this.partialMessage.get();
+        if (stringBuilder != null) {
+            stringBuilder.append(webSocketMessage.getPayload());
+        } else {
+            stringBuilder = new StringBuilder();
+            stringBuilder.append(webSocketMessage.getPayload());
+            this.partialMessage.set(stringBuilder);
+        }
+
+        if (!webSocketMessage.isLast()) {
+            return;
+        }
+
+        this.partialMessage.remove();
+
+        Message message = Utils.deserialize(Message.class, stringBuilder.toString());
         switch (message.getType()) {
             case NEW_BLOCK:
                 logger.debug(String.format("NEW BLOCK NOTIFICATION RECEIVED!!! BLOCK INDEX: %s", message.getBlock().getIndex()));
@@ -43,7 +63,7 @@ public class SocketHandler implements WebSocketHandler {
             case GET_CHAIN:
                 logger.debug("GET_CHAIN RECEIVED");
                 webSocketSession.sendMessage(new TextMessage(
-                                Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE, this.nodeController.getBlockChain()))));
+                        Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE, this.nodeController.getBlockChain()))));
                 break;
             case GET_CHAIN_RESPONSE:
                 logger.debug("GET_CHAIN_RESPONSE");
@@ -56,6 +76,8 @@ public class SocketHandler implements WebSocketHandler {
                 break;
             case STATUS_RESPONSE:
                 logger.debug("STATUS_RESPONSE RECEIVED");
+                Peer peer = this.peerController.getPeers().get(webSocketSession.getId());
+                peer.setUuid(message.getNodeInfo().getUuid());
                 this.nodeController.getStatuses().add(message.getNodeInfo());
                 break;
         }
@@ -68,13 +90,13 @@ public class SocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
-        String url = webSocketSession.getRemoteAddress().toString().replace("/", "");
-        this.peerController.getPeers().remove(new Peer(url));
-        logger.info(String.format("DISCONNECTED PEER: %s", webSocketSession.getRemoteAddress()));
+        this.peerController.getPeers().remove(webSocketSession.getId());
+        logger.info(String.format("DISCONNECTED PEER: %s WITH REASON: %s", webSocketSession.getRemoteAddress(), closeStatus.getReason()));
+        logger.debug(String.format("REASON: %s", closeStatus.getReason()));
     }
 
     @Override
     public boolean supportsPartialMessages() {
-        return false;
+        return true;
     }
 }
