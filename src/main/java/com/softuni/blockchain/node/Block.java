@@ -1,11 +1,14 @@
 package com.softuni.blockchain.node;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 public class Block {
 
     private int index;
     private List<Transaction> transactions;
+    private double expectedReward;
     private int difficulty;         //number
     private String prevBlockHash;   //hex_number
     private String minedBy;         //address
@@ -15,6 +18,26 @@ public class Block {
     private Long nonce;             //number
     private Long dateCreated;       //timestamp
     private String blockHash;       //hex_number
+
+    @JsonIgnore
+    public Block getBlockForMining(){
+
+        Block block = new Block();
+        block.setIndex(this.index);
+        block.setExpectedReward(this.expectedReward);
+        block.setBlockDataHash(this.blockDataHash);
+        block.setDifficulty(this.difficulty);
+
+        return block;
+    }
+
+    public double getExpectedReward() {
+        return expectedReward;
+    }
+
+    public void setExpectedReward(double expectedReward) {
+        this.expectedReward = expectedReward;
+    }
 
     public int getIndex() {
         return index;

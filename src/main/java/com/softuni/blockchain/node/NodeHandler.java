@@ -25,9 +25,9 @@ public class NodeHandler {
     }
 
     @GetMapping("/blocks")
-    public Block block() {
+    public List<Block> block() {
 
-        return new Block();
+        return this.nodeController.getBlockChain();
     }
 
     @GetMapping("/blocks/{index}")
