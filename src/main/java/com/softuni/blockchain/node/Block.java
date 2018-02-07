@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
-public class Block {
+public class Block implements Comparable<Block> {
 
     private int index;
     private List<Transaction> transactions;
@@ -20,9 +20,8 @@ public class Block {
     private String blockHash;       //hex_number
 
 
-
     @JsonIgnore
-    public Block getBlockForMining(){
+    public Block getBlockForMining() {
 
         Block block = new Block();
         block.setIndex(this.index);
@@ -122,5 +121,25 @@ public class Block {
                 ", dateCreated=" + dateCreated +
                 ", blockHash='" + blockHash + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Block o) {
+        int index = this.index - o.getIndex();
+        if (index != 0) {
+            return index;
+        }
+
+        int difficulty = this.difficulty - o.getDifficulty();
+        if (difficulty != 0) {
+            return difficulty;
+        }
+
+        int dateCreated = this.getDateCreated().compareTo(o.getDateCreated());
+        if (dateCreated != 0) {
+            return dateCreated;
+        }
+
+        return 0;
     }
 }

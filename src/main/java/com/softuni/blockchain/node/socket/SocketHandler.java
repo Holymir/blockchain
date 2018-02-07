@@ -1,15 +1,10 @@
 package com.softuni.blockchain.node.socket;
 
-import com.softuni.blockchain.node.NodeController;
-import com.softuni.blockchain.node.Peer;
-import com.softuni.blockchain.node.PeerController;
+import com.softuni.blockchain.node.*;
 import com.softuni.blockchain.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 
 public class SocketHandler implements WebSocketHandler {
 
@@ -34,18 +29,34 @@ public class SocketHandler implements WebSocketHandler {
     }
 
     @Override
-    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) {
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
         Message message = Utils.deserialize(Message.class, webSocketMessage.getPayload().toString());
         switch (message.getType()) {
             case NEW_BLOCK:
                 logger.debug(String.format("NEW BLOCK NOTIFICATION RECEIVED!!! BLOCK INDEX: %s", message.getBlock().getIndex()));
-
                 if (this.nodeController.getLastBlock().getIndex() >= message.getBlock().getIndex()) {
                     logger.debug("DO NOTING, ALREADY WITH LONGEST CHAIN");
                     break;
                 }
-
                 this.nodeController.getUnconfirmedBlocks().add((message.getBlock()));
+                break;
+            case GET_CHAIN:
+                logger.debug("GET_CHAIN RECEIVED");
+                webSocketSession.sendMessage(new TextMessage(
+                                Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE, this.nodeController.getBlockChain()))));
+                break;
+            case GET_CHAIN_RESPONSE:
+                logger.debug("GET_CHAIN_RESPONSE");
+                this.nodeController.getUnconfirmedBlocks().addAll(message.getBlockchain());
+                break;
+            case GET_STATUS:
+                logger.debug("STATUS_REQUEST RECEIVED");
+                webSocketSession.sendMessage(new TextMessage(Utils.serialize(new Message(MessageType.STATUS_RESPONSE,
+                        new NodeInfo(new Node(this.peerController, this.nodeController))))));
+                break;
+            case STATUS_RESPONSE:
+                logger.debug("STATUS_RESPONSE RECEIVED");
+                this.nodeController.getStatuses().add(message.getNodeInfo());
                 break;
         }
     }

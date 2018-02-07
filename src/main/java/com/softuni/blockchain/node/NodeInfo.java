@@ -87,4 +87,18 @@ public class NodeInfo {
     public void setMiningJobs(MiningJob miningJobs) {
         this.miningJobs = miningJobs;
     }
+
+    @Override
+    public String toString() {
+        return "NodeInfo{" +
+                "uuid='" + uuid + '\'' +
+                ", about='" + about + '\'' +
+                ", peers=" + peers +
+                ", blocks=" + blocks +
+                ", transactions=" + transactions +
+                ", balance=" + balance +
+                ", difficulty=" + difficulty +
+                ", miningJobs=" + miningJobs +
+                '}';
+    }
 }

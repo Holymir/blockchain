@@ -33,19 +33,7 @@ public class NodeEngine {
     }
 
     @Scheduled(fixedDelay = 5_000)
-    void run() {
-
-//        // New block is found
-//        if (this.nodeController.isNewBlockIsFound()) {
-//            this.nodeController.setNewBlockIsFound(false);
-//
-//            this.nodeController.getBlockChain().add(this.nodeController.getCandidateBlock());
-//            this.nodeController.setCandidateBlock(null);
-//
-//            this.notifyPeersForNewBlock(this.nodeController.getLastBlock());
-//        }
-
-        // Verify blocks, add to chain if valid, notify peers.
+    synchronized void run() {
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
             this.nodeController.getUnconfirmedBlocks().removeIf(block -> {
                 logger.info(String.format("VERIFY BLOCK: %s", block));
@@ -58,11 +46,39 @@ public class NodeEngine {
             });
         }
 
-        // Generate block
         if (this.nodeController.getCandidateBlock() == null) {
             logger.info("CREATING CANDIDATE...");
             this.createCandidateBlock();
         }
+
+        if (!this.nodeController.getStatuses().isEmpty()) {
+            this.nodeController.getStatuses().forEach(nodeInfo -> {
+                logger.debug(String.format("PEER STATUS: %s", nodeInfo));
+                if (nodeInfo.getBlocks() > this.nodeController.getBlockChain().size()) {
+                    //TODO: get block from that peer
+                }
+            });
+
+            this.nodeController.getStatuses().clear();
+//            webSocketSession.sendMessage(new TextMessage(Utils.serialize(new Message(MessageType.GET_CHAIN))));
+        }
+
+        askPeersForChainUpdates();
+    }
+
+    private void askPeersForChainUpdates() {
+        logger.info("ASK PEERS FOR STATUS UPDATE");
+        this.peerController.getPeers()
+                .entrySet().parallelStream()
+                .forEach((entry) -> {
+                    WebSocketSession session = entry.getValue();
+                    TextMessage textMessage = new TextMessage(Utils.serialize(new Message(MessageType.GET_STATUS)));
+                    try {
+                        session.sendMessage(textMessage);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage());
+                    }
+                });
     }
 
     public void createCandidateBlock() {

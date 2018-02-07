@@ -17,12 +17,10 @@ public class NodeHandler {
     @Autowired
     private NodeController nodeController;
 
-    @Autowired
-    private Node node;
 
     @GetMapping("/info")
     public NodeInfo nodeInfo() {
-        return new NodeInfo(node);
+        return new NodeInfo(new Node(peerController, nodeController));
     }
 
     @GetMapping("/blocks")

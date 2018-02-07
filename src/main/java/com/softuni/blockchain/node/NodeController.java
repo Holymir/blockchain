@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class NodeController {
@@ -21,7 +18,7 @@ public class NodeController {
     private Set<Block> unconfirmedBlocks;
     private List<Block> blockChain;
     private Block candidateBlock;
-    private boolean newBlockIsFound;
+    private Set<NodeInfo> statuses;
 
     private final WalletController walletController;
 
@@ -30,7 +27,8 @@ public class NodeController {
     public NodeController(WalletController walletController) {
         this.walletController = walletController;
         this.pendingTransactions = new ArrayList<>();
-        this.unconfirmedBlocks = new HashSet<>();
+        this.unconfirmedBlocks = new TreeSet<>();
+        this.statuses = new HashSet<>();
         this.blockChain = new ArrayList<>();
         this.blockChain.add(generateGenesisBlock());
     }
@@ -67,7 +65,7 @@ public class NodeController {
     public boolean verifyBlock(Block block) {
 
         if (this.getLastBlock().getIndex() + 1 == block.getIndex()
-                && this.getLastBlock().getBlockHash().equals(block.getBlockHash())) {
+                && this.getLastBlock().getBlockHash().equals(block.getPrevBlockHash())) {
             return true;
         }
         return false;
@@ -89,11 +87,7 @@ public class NodeController {
         this.candidateBlock = candidateBlock;
     }
 
-    public boolean isNewBlockIsFound() {
-        return newBlockIsFound;
-    }
-
-    public void setNewBlockIsFound(boolean newBlockIsFound) {
-        this.newBlockIsFound = newBlockIsFound;
+    synchronized public Set<NodeInfo> getStatuses() {
+        return statuses;
     }
 }

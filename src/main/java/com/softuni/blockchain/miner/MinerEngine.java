@@ -45,6 +45,7 @@ public class MinerEngine {
         validBlock.setDifficulty(difficulty);
         validBlock.setNonce(nonce);
         validBlock.setBlockHash(hashToCheck);
+        validBlock.setMinedBy("Genady");
         return validBlock;
 
     }

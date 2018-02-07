@@ -1,17 +1,14 @@
 package com.softuni.blockchain.node;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Component
 public class Node {
 
-    private String uuid;
+    private static final String uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
     private String about;
     private Set<Peer> peers;
     private List<Block> blocks;
@@ -21,7 +18,6 @@ public class Node {
     private MiningJob miningJobs;
 
     public Node(PeerController peerController, NodeController nodeController) {
-        this.uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
         this.peers = peerController.getPeers().keySet();
         this.blocks = nodeController.getBlockChain();
         this.transactions = nodeController.getPendingTransactions();
