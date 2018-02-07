@@ -1,6 +1,7 @@
 package com.softuni.blockchain.node;
 
 
+import com.softuni.blockchain.miner.MinerEngine;
 import com.softuni.blockchain.utils.Utils;
 import com.softuni.blockchain.wallet.Crypto;
 import com.softuni.blockchain.wallet.WalletController;
@@ -9,23 +10,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class NodeController {
 
-    private List<Transaction> pendingTransactions = new ArrayList<>();
-    private Set<Block> unconfirmedBlocks = new HashSet<>();
-    private List<Block> blockChain = new ArrayList<>();
+    private List<Transaction> pendingTransactions;
+    private Set<Block> unconfirmedBlocks;
+    private List<Block> blockChain;
+    private Block candidateBlock;
 
     private final WalletController walletController;
+
 
     @Autowired
     public NodeController(WalletController walletController) {
         this.walletController = walletController;
-        this.blockChain.add(new Block() {{
-            setIndex(1);
-        }});
+        this.pendingTransactions = new ArrayList<>();
+        this.unconfirmedBlocks = new HashSet<>();
+        this.blockChain = new ArrayList<>();
+        this.blockChain.add(generateGenesisBlock());
     }
 
     public Transaction createTransaction(Transaction transaction) {
@@ -59,5 +66,31 @@ public class NodeController {
 
     public List<Block> getBlockChain() {
         return blockChain;
+    }
+
+    @Autowired
+    private MinerEngine minerEngine;
+
+    public void createCandidateBlock() {
+
+        if (candidateBlock == null) {
+            int fee = 5;
+            candidateBlock = new Block();
+            candidateBlock.setIndex(blockChain.size());
+            candidateBlock.setExpectedReward(fee);
+            candidateBlock.setBlockDataHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(pendingTransactions).getBytes())));
+            candidateBlock.setTransactions(pendingTransactions);
+            pendingTransactions.clear();
+
+            minerEngine.mine(candidateBlock);
+        }
+    }
+
+    private Block generateGenesisBlock() {
+
+        Block block = new Block();
+        block.setIndex(0);
+        block.setBlockHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(block).getBytes())));
+        return block;
     }
 }
