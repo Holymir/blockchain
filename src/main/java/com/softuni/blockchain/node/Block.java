@@ -19,6 +19,8 @@ public class Block {
     private Long dateCreated;       //timestamp
     private String blockHash;       //hex_number
 
+
+
     @JsonIgnore
     public Block getBlockForMining(){
 
