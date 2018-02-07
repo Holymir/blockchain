@@ -17,7 +17,7 @@ public class Transaction {
     private Boolean paid;           //bool
 
     @JsonIgnore
-    public Transaction getCorePart(){
+    public Transaction getCorePart() {
         Transaction transaction = new Transaction();
         transaction.setFrom(this.from);
         transaction.setTo(this.to);

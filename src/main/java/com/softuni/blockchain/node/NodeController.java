@@ -9,24 +9,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class NodeController {
 
     private List<Transaction> pendingTransactions = new ArrayList<>();
+    private Set<Block> unconfirmedBlocks = new HashSet<>();
+    private List<Block> blockChain = new ArrayList<>();
+
+    private final WalletController walletController;
 
     @Autowired
-    private WalletController walletController;
+    public NodeController(WalletController walletController) {
+        this.walletController = walletController;
+        this.blockChain.add(new Block() {{
+            setIndex(1);
+        }});
+    }
 
     public Transaction createTransaction(Transaction transaction) {
-        // 1. validate Transaction
         this.verifyTransaction(transaction.getCorePart());
-
-        // 3. add to pending transactions
-        pendingTransactions.add(transaction);
-
+        this.pendingTransactions.add(transaction);
         transaction.setDateReceived(Instant.now().toEpochMilli());
         transaction.setTransactionHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(transaction).getBytes())));
 
@@ -39,5 +43,21 @@ public class NodeController {
 
     public List<Transaction> getPendingTransactions() {
         return this.pendingTransactions;
+    }
+
+    public Block getLastBlock() {
+        return this.blockChain.get(this.blockChain.size() - 1);
+    }
+
+    public Set<Block> getUnconfirmedBlocks() {
+        return this.unconfirmedBlocks;
+    }
+
+    public boolean verifyBlock(Block block) {
+        return this.getLastBlock().getIndex() + 1 == block.getIndex();
+    }
+
+    public List<Block> getBlockChain() {
+        return blockChain;
     }
 }

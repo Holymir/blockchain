@@ -24,10 +24,9 @@ public class NodeHandler {
         return new NodeInfo(node);
     }
 
-    @GetMapping("/blocks")
-    public Block block() {
-
-        return new Block();
+    @PostMapping("/blocks")
+    public void block(@RequestBody Block block) {
+        this.nodeController.getUnconfirmedBlocks().add(block);
     }
 
     @GetMapping("/blocks/{index}")

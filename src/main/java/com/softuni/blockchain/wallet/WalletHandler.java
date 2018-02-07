@@ -1,7 +1,6 @@
 package com.softuni.blockchain.wallet;
 
 
-import com.softuni.blockchain.node.NodeController;
 import com.softuni.blockchain.node.RequestTransactionDTO;
 import com.softuni.blockchain.node.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +16,6 @@ public class WalletHandler {
 
     @PostMapping("/")
     public Wallet generateWallet() {
-        return this.walletController.generateWallet();
-    }
-
-    @PostMapping("/{publicKey}/address")
-    public Wallet generateWallet(@PathVariable String publicKey) {
         return this.walletController.generateWallet();
     }
 

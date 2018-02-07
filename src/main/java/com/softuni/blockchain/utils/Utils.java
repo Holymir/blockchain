@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.softuni.blockchain.node.socket.Message;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
+import java.io.IOException;
 
 
 public class Utils {
@@ -28,6 +31,16 @@ public class Utils {
             e.printStackTrace();
         }
 
-        return null;
+        throw new RuntimeException(String.format("Unable to Serialize %s object", object));
+    }
+
+    public static <T> T deserialize(Class<T> type, String serializedObject) {
+        try {
+            return objectMapper.readValue(serializedObject, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        throw new RuntimeException(String.format("Unable to Deserialize %s from string.", type));
     }
 }

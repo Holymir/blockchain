@@ -23,7 +23,7 @@ public class Node {
     public Node(PeerController peerController, NodeController nodeController) {
         this.uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
         this.peers = peerController.getPeers().keySet();
-        this.blocks = new ArrayList<>();
+        this.blocks = nodeController.getBlockChain();
         this.transactions = nodeController.getPendingTransactions();
     }
 
