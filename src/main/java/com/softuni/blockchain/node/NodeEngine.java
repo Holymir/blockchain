@@ -57,11 +57,14 @@ public class NodeEngine {
     }
 
     public void createCandidateBlock() {
+
         int fee = 5;
         Block candidateBlock = new Block();
         candidateBlock.setIndex(this.nodeController.getBlockChain().size());
         candidateBlock.setExpectedReward(fee);
+        candidateBlock.setDifficulty(4);
         candidateBlock.setBlockDataHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(this.nodeController.getPendingTransactions()).getBytes())));
+        candidateBlock.setPrevBlockHash(nodeController.getLastBlock().getBlockHash());
         candidateBlock.setTransactions(this.nodeController.getPendingTransactions());
         this.nodeController.getPendingTransactions().clear();
 
