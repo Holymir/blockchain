@@ -68,7 +68,7 @@ public class NodeController {
     // VerifyBlock
     public boolean verifyBlock(Block block) {
 
-        boolean oldnextIndex = this.getLastBlock().getIndex() + 1 == block.getIndex();
+        boolean oldNextIndex = this.getLastBlock().getIndex() + 1 == block.getIndex();
         boolean oldNewHash = this.getLastBlock().getBlockHash().equals(block.getPrevBlockHash());
 
         boolean checkTransactionHash = transactionHash(block);
@@ -77,7 +77,7 @@ public class NodeController {
         if (!oldNewHash) {
             return false;
         }
-        if (!oldnextIndex) {
+        if (!oldNextIndex) {
             return false;
         }
         if (!checkBlockHash) {
