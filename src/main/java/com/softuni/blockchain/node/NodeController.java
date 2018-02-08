@@ -113,6 +113,7 @@ public class NodeController {
         Block block = new Block();
         block.setIndex(0);
         block.setBlockHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(block).getBytes())));
+        block.setDateCreated(0L);
         return block;
     }
 
