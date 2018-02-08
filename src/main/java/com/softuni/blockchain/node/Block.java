@@ -120,10 +120,11 @@ public class Block implements Comparable<Block> {
     public String toString() {
         return "Block{" +
                 "index=" + index +
-                ", minedBy='" + minedBy + '\'' +
+                ", minedBy='" + (minedBy == null ?  "null": minedBy.substring(minedBy.length() - 5)) + '\'' +
                 ", nonce=" + nonce +
                 ", dateCreated=" + dateCreated +
-                ", blockHash='" + blockHash + '\'' +
+                ", blockHash='" + blockHash.substring(blockHash.length() - 5) + '\'' +
+                ", Transactions='" + transactions.size() + '\'' +
                 '}';
     }
 
