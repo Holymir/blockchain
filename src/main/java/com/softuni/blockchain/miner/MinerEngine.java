@@ -2,10 +2,10 @@ package com.softuni.blockchain.miner;
 
 import com.softuni.blockchain.node.Block;
 import com.softuni.blockchain.node.Node;
-import com.softuni.blockchain.wallet.Crypto;
-import org.bouncycastle.util.encoders.Hex;
+import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongycastle.util.encoders.Hex;
 import org.springframework.stereotype.Controller;
 
 import java.util.Date;
@@ -26,14 +26,14 @@ public class MinerEngine {
         Long nextTimestamp = new Date().getTime();
 
         String nextHash = index + thisDataBlockHash + previousBlockHash + nextTimestamp + nonce;
-        String hashToCheck = Hex.toHexString(Crypto.sha256(nextHash.getBytes()));
+        String hashToCheck = Hex.toHexString(HashUtil.sha256(nextHash.getBytes()));
 
         while (!hashToCheck.substring(0, difficulty).equals(generateRepeatingString(difficulty))) {
 
             nextTimestamp = new Date().getTime();
             nonce++;
             nextHash = index + thisDataBlockHash + previousBlockHash + nextTimestamp + nonce;
-            hashToCheck = Hex.toHexString(Crypto.sha256(nextHash.getBytes()));
+            hashToCheck = Hex.toHexString(HashUtil.sha256(nextHash.getBytes()));
         }
 
         logger.info("HashFound: " + hashToCheck);

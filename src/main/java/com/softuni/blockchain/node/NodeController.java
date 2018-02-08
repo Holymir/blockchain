@@ -2,9 +2,9 @@ package com.softuni.blockchain.node;
 
 
 import com.softuni.blockchain.utils.Utils;
-import com.softuni.blockchain.wallet.Crypto;
 import com.softuni.blockchain.wallet.WalletController;
-import org.bouncycastle.util.encoders.Hex;
+import com.softuni.blockchain.wallet.crypto.HashUtil;
+import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,15 +40,13 @@ public class NodeController {
         }
         this.pendingTransactions.add(transaction);
         transaction.setDateReceived(Instant.now().toEpochMilli());
-        transaction.setTransactionHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(transaction).getBytes())));
+        transaction.setTransactionHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(transaction).getBytes())));
 
         return transaction;
     }
 
     private boolean verifyTransaction(Transaction transaction) {
-//        TODO check logic
-//        return this.walletController.verify(Utils.serialize(transaction.getCorePart()), transaction.getSenderSignature(), transaction.getSenderPubKey());
-        return true;
+        return this.walletController.verify(Utils.serialize(transaction.getCorePart()), transaction.getSenderSignature(), transaction.getSenderPubKey());
     }
 
     public List<Transaction> getPendingTransactions() {
@@ -93,7 +91,7 @@ public class NodeController {
 
     private boolean blockHashChecker(Block block) {
         String blockHash = block.getIndex() + block.getBlockDataHash() + block.getPrevBlockHash() + block.getDateCreated() + block.getNonce();
-        String hashToCheck = Hex.toHexString(Crypto.sha256(blockHash.getBytes()));
+        String hashToCheck = Hex.toHexString(HashUtil.sha256(blockHash.getBytes()));
         return hashToCheck.equals(block.getBlockHash());
     }
 
@@ -114,7 +112,7 @@ public class NodeController {
 
         Block block = new Block();
         block.setIndex(0);
-        block.setBlockHash("0x" + Hex.toHexString(Crypto.sha256(Utils.serialize(block).getBytes())));
+        block.setBlockHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(block).getBytes())));
         return block;
     }
 
