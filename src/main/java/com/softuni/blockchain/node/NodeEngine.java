@@ -1,5 +1,6 @@
 package com.softuni.blockchain.node;
 
+import com.softuni.blockchain.miner.Miner;
 import com.softuni.blockchain.miner.MinerEngine;
 import com.softuni.blockchain.node.socket.Message;
 import com.softuni.blockchain.node.socket.MessageType;
@@ -15,6 +16,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -25,12 +28,14 @@ public class NodeEngine {
     private final PeerController peerController;
     private final NodeController nodeController;
     private final MinerEngine minerEngine;
+    private Miner miner;
 
     @Autowired
-    public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine) {
+    public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine, Miner miner) {
         this.peerController = peerController;
         this.nodeController = nodeController;
         this.minerEngine = minerEngine;
+        this.miner = miner;
     }
 
     @Scheduled(fixedDelay = 5_000)
@@ -95,14 +100,23 @@ public class NodeEngine {
 
     public void createCandidateBlock() {
 
-        int fee = 5;
+        double fee = 5;
+        Transaction rewardToMiner = new Transaction();
+        rewardToMiner.setFrom("coinBased");
+        rewardToMiner.setTransactionHash("coinBased");
+        rewardToMiner.setTo(miner.getAddress());
+        rewardToMiner.setValue(fee);
+        List<Transaction> transactionsPlusReward = new ArrayList<>(this.nodeController.getPendingTransactions());
+        transactionsPlusReward.add(rewardToMiner);
+
+
         Block candidateBlock = new Block();
         candidateBlock.setIndex(this.nodeController.getBlockChain().size());
         candidateBlock.setExpectedReward(fee);
         candidateBlock.setDifficulty(5);
-        candidateBlock.setBlockDataHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(this.nodeController.getPendingTransactions()).getBytes())));
+        candidateBlock.setBlockDataHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(transactionsPlusReward).getBytes())));
         candidateBlock.setPrevBlockHash(nodeController.getLastBlock().getBlockHash());
-        candidateBlock.setTransactions(this.nodeController.getPendingTransactions());
+        candidateBlock.setTransactions(transactionsPlusReward);
         this.nodeController.getPendingTransactions().clear();
         this.nodeController.setCandidateBlock(candidateBlock);
 
@@ -123,5 +137,13 @@ public class NodeEngine {
                         logger.error(e.getMessage());
                     }
                 });
+    }
+
+    public Miner getMiner() {
+        return miner;
+    }
+
+    public void setMiner(Miner miner) {
+        this.miner = miner;
     }
 }

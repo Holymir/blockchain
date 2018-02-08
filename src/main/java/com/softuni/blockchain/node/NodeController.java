@@ -97,6 +97,9 @@ public class NodeController {
 
     private boolean transactionHash(Block block) {
         for (Transaction tr : block.getTransactions()) {
+            if (tr.getTransactionHash().equals("coinBased")) {
+                return true;
+            }
             if (!verifyTransaction(tr)) {
                 return false;
             }
