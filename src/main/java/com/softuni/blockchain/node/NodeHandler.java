@@ -23,20 +23,6 @@ public class NodeHandler {
         return new NodeInfo(new Node(peerController, nodeController));
     }
 
-    @GetMapping("/blocks")
-    public List<Block> block() {
-
-        return this.nodeController.getBlockChain();
-    }
-
-    @GetMapping("/blocks/{index}")
-    public Block block(@PathVariable Integer index) {
-        Block block = new Block();
-        block.setIndex(index);
-
-        return block;
-    }
-
     @GetMapping("/peers")
     public List<Peer> peer() {
         return new ArrayList<>(peerController.getPeers().values());
