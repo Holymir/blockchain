@@ -89,20 +89,11 @@ public class NodeController {
         return true;
     }
 
-    public boolean verifyBlock(Block previousBlock, Block block) {
-
-        boolean oldNextIndex = previousBlock.getIndex() + 1 == block.getIndex();
-        boolean oldNewHash = previousBlock.getBlockHash().equals(block.getPrevBlockHash());
+    public boolean verifyBlockIntegrity(Block block) {
 
         boolean checkTransactionHash = transactionHash(block);
         boolean checkBlockHash = blockHashChecker(block);
 
-        if (!oldNewHash) {
-            return false;
-        }
-        if (!oldNextIndex) {
-            return false;
-        }
         if (!checkBlockHash) {
             return false;
         }
@@ -141,6 +132,7 @@ public class NodeController {
         block.setIndex(0);
         block.setBlockHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(block).getBytes())));
         block.setDateCreated(0L);
+        block.setPrevBlockHash("NONE");
         return block;
     }
 
