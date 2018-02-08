@@ -7,6 +7,8 @@ import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.stereotype.Component;
 
+import java.security.SignatureException;
+
 
 @Component
 public class WalletController {
@@ -22,12 +24,19 @@ public class WalletController {
 
     private String signMessage(String message, String privateKey) {
         ECKey privateKeyPoint = ECKey.fromPrivate(Hex.decode(privateKey));
-        ECKey.ECDSASignature ecdsaSignature = privateKeyPoint.doSign(HashUtil.sha3(message.getBytes()));
-        return ecdsaSignature.toHex();
+        ECKey.ECDSASignature ecdsaSignature = privateKeyPoint.sign(HashUtil.sha256(message.getBytes()));
+        return ecdsaSignature.toBase64();
     }
 
     public boolean verify(String message, String signedMessage, String publicKey) {
-      return true;
+        try {
+            byte[] bytes = ECKey.signatureToKeyBytes(HashUtil.sha256(message.getBytes()), signedMessage);
+            ECKey signer = ECKey.fromPublicOnly(bytes);
+            return signer.equals(ECKey.fromPublicOnly(Hex.decode(publicKey.getBytes())));
+        } catch (SignatureException e) {
+        }
+
+        return false;
     }
 
     public Transaction createTransaction(Transaction transaction, Wallet wallet) {
