@@ -5,5 +5,5 @@ public enum MessageType {
     GET_CHAIN,
     GET_CHAIN_RESPONSE,
     GET_STATUS,
-    STATUS_RESPONSE,
+    STATUS_RESPONSE, NEW_TRANSACTIONS,
 }

@@ -58,6 +58,25 @@ public class NodeEngine {
         if (!this.nodeController.getStatuses().isEmpty()) {
             this.askPeersForBlocks();
         }
+
+        if (!this.nodeController.getPendingTransactions().isEmpty()) {
+            this.broadcastTransactions();
+        }
+    }
+
+    private void broadcastTransactions() {
+        logger.info("BROADCAST PENDING TRANSACTIONS TO PEERS");
+        this.peerController.getPeers()
+                .values().parallelStream()
+                .forEach(peer -> {
+                    WebSocketSession session = peer.getSession();
+                    TextMessage textMessage = new TextMessage(Utils.serialize(new Message(MessageType.NEW_TRANSACTIONS, this.nodeController.getPendingTransactions())));
+                    try {
+                        session.sendMessage(textMessage);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage());
+                    }
+                });
     }
 
     private void askPeersForBlocks() {

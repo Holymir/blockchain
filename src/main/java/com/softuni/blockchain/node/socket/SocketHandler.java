@@ -60,10 +60,13 @@ public class SocketHandler implements WebSocketHandler {
                 }
                 this.nodeController.getUnconfirmedBlocks().add((message.getBlock()));
                 break;
+            case NEW_TRANSACTIONS:
+                this.nodeController.getPendingTransactions().addAll(message.getTransactions());
+                break;
             case GET_CHAIN:
                 logger.debug("GET_CHAIN RECEIVED");
                 webSocketSession.sendMessage(new TextMessage(
-                        Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE, this.nodeController.getBlockChain()))));
+                        Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE, this.nodeController.getBlockChain(), 0, 0))));
                 break;
             case GET_CHAIN_RESPONSE:
                 logger.debug("GET_CHAIN_RESPONSE");
