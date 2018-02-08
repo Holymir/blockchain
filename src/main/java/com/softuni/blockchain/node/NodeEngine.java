@@ -15,7 +15,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class NodeEngine {
@@ -25,6 +25,8 @@ public class NodeEngine {
     private final PeerController peerController;
     private final NodeController nodeController;
     private final MinerEngine minerEngine;
+
+    private final Object unconfirmedBlockMutex = new Object();
 
     @Autowired
     public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine) {
@@ -36,14 +38,77 @@ public class NodeEngine {
     @Scheduled(fixedDelay = 5_000)
     synchronized void run() {
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
-            this.nodeController.getUnconfirmedBlocks().removeIf(block -> {
+            Map<String, List<List<Block>>> temporalChainsByBlockHash = new HashMap<>();
+            List<Block> unconfirmedBlocks;
+            synchronized (unconfirmedBlockMutex) {
+                unconfirmedBlocks = new ArrayList<>(this.nodeController.getUnconfirmedBlocks());
+                this.nodeController.getUnconfirmedBlocks().clear();
+            }
+
+            if (unconfirmedBlocks.size() == 1) {
+                Block block = unconfirmedBlocks.get(0);
                 logger.info(String.format("VERIFY BLOCK: %s", block));
                 if (this.nodeController.verifyBlock(block)) {
                     logger.info(String.format("ADDING BLOCK: %s TO BLOCKCHAIN", block));
                     this.nodeController.getBlockChain().add(block);
                     this.notifyPeersForNewBlock(block);
                 }
-                return true;
+
+                return;
+            }
+
+            for (int i = 0; i < unconfirmedBlocks.size(); i++) {
+                Block block = unconfirmedBlocks.get(i);
+                Block nextBlock = unconfirmedBlocks.get(i + 1);
+
+                if (this.nodeController.verifyBlock(block, nextBlock)) {
+                    List<List<Block>> subChainsForBlockHash = temporalChainsByBlockHash.get(block.getBlockHash());
+                    if (subChainsForBlockHash != null) {
+                        boolean isPartFromSubChain = false;
+                        for (List<Block> subchains : subChainsForBlockHash) {
+                            Block lastBlockFromSubChain = subchains.get(subchains.size() - 1);
+                            if (lastBlockFromSubChain.getBlockHash().equals(block.getPrevBlockHash())) {
+                                subchains.add(block);
+                                isPartFromSubChain = true;
+                            }
+                        }
+
+                        if (!isPartFromSubChain) {
+                            List<Block> subChain = new ArrayList<>();
+                            subChain.add(block);
+                            subChainsForBlockHash.add(subChain);
+                        }
+                    }
+                } else {
+                    temporalChainsByBlockHash.put(block.getBlockHash(), new LinkedList<>());
+                }
+            }
+
+            // Merge all chains into one! Almighty, the 'da si ebe' one!
+            List<Block> blockChain = this.nodeController.getBlockChain();
+
+            temporalChainsByBlockHash.keySet().forEach(headHash -> {
+                Optional<Block> blockInMyChain = blockChain.stream().filter(block -> block.getBlockHash().equals(headHash)).findAny();
+
+                List<List<Block>> subChains = temporalChainsByBlockHash.get(headHash);
+                if (blockInMyChain.isPresent()) {
+                    Block block = blockInMyChain.get();
+                    for (List<Block> subChain : subChains) {
+                        int newLength = subChains.size() + block.getIndex();
+                        if (newLength > blockChain.size()) {
+                            List<Block> forRemove = blockChain.subList(block.getIndex(), blockChain.size() - 1);
+                            blockChain.removeAll(forRemove);
+                            blockChain.addAll(subChain);
+                        }
+                    }
+                } else {
+                    for (List<Block> subChain : subChains) {
+                        if (subChain.size() > blockChain.size()) {
+                            blockChain.clear();
+                            blockChain.addAll(subChain);
+                        }
+                    }
+                }
             });
         }
 

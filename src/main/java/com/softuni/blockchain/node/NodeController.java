@@ -89,6 +89,30 @@ public class NodeController {
         return true;
     }
 
+    public boolean verifyBlock(Block previousBlock, Block block) {
+
+        boolean oldNextIndex = previousBlock.getIndex() + 1 == block.getIndex();
+        boolean oldNewHash = previousBlock.getBlockHash().equals(block.getPrevBlockHash());
+
+        boolean checkTransactionHash = transactionHash(block);
+        boolean checkBlockHash = blockHashChecker(block);
+
+        if (!oldNewHash) {
+            return false;
+        }
+        if (!oldNextIndex) {
+            return false;
+        }
+        if (!checkBlockHash) {
+            return false;
+        }
+        if (!checkTransactionHash) {
+            return false;
+        }
+
+        return true;
+    }
+
     private boolean blockHashChecker(Block block) {
         String blockHash = block.getIndex() + block.getBlockDataHash() + block.getPrevBlockHash() + block.getDateCreated() + block.getNonce();
         String hashToCheck = Hex.toHexString(HashUtil.sha256(blockHash.getBytes()));
