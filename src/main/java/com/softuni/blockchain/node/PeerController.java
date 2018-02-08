@@ -23,17 +23,15 @@ public class PeerController {
     @Autowired
     private NodeController nodeController;
 
-    private Map<Peer, WebSocketSession> peers = new HashMap<>();
+    private Map<String, Peer> peers = new HashMap<>();
 
-    public Map<Peer, WebSocketSession> getPeers() {
+    public Map<String, Peer> getPeers() {
         return peers;
     }
 
     public void addPeer(Peer peer) {
         logger.debug(String.format("Peer with address: '%s' received: ", peer.getUrl()));
-        if (!peers.containsKey(peer)) {
-            this.connectToPeer(peer);
-        }
+        this.connectToPeer(peer);
     }
 
     private void connectToPeer(Peer peer) {
@@ -42,17 +40,20 @@ public class PeerController {
 
         ListenableFuture<WebSocketSession> webSocketSessionListenableFuture =
                 webSocketClient.doHandshake(sessionHandler, String.format("ws://%s", peer.getUrl()));
-        webSocketSessionListenableFuture.addCallback(stompSession -> {
-            logger.debug(String.format("Peer with address: '%s' added to system.", peer.getUrl()));
-            this.getPeers().replace(peer, stompSession);
+        webSocketSessionListenableFuture.addCallback(webSocketSession -> {
+            logger.debug(String.format("Session with id '%s' is open to Peer with address: '%s' added to system.", webSocketSession.getId(), peer.getUrl()));
+
+            peer.setSession(webSocketSession);
+            peer.setSessionId(webSocketSession.getId());
+
+            this.getPeers().put(webSocketSession.getId(), peer);
+
         }, throwable -> logger.error("Error connecting to peer."));
     }
 
     public void remove(Peer peer) throws IOException {
-        WebSocketSession session = this.getPeers().remove(peer);
-        if (session != null) {
-            session.close();
-        }
+        peer.getSession().close();
+        this.getPeers().remove(peer.getSessionId());
     }
 
 //    private void addMeAsPeer(Peer peer) {

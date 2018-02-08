@@ -15,6 +15,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class NodeEngine {
@@ -55,23 +56,34 @@ public class NodeEngine {
             this.nodeController.getStatuses().forEach(nodeInfo -> {
                 logger.debug(String.format("PEER STATUS: %s", nodeInfo));
                 if (nodeInfo.getBlocks() > this.nodeController.getBlockChain().size()) {
-                    //TODO: get block from that peer
+                    Optional<Peer> peerWithId = peerController.getPeers().values().stream().findAny();
+                    if (peerWithId.isPresent()) {
+                        Peer peer = peerWithId.get();
+                        try {
+                            peer.getSession()
+                                    .sendMessage(new TextMessage(Utils.serialize(new Message(MessageType.GET_CHAIN))));
+                        } catch (IOException e) {
+                            logger.debug(String.format("ERROR COMMUNICATING WITH PEER: %s ON ADDRESS: %s", peer.getUuid(), peer.getUrl()));
+                        }
+                    }
+
                 }
             });
 
             this.nodeController.getStatuses().clear();
-//            webSocketSession.sendMessage(new TextMessage(Utils.serialize(new Message(MessageType.GET_CHAIN))));
         }
 
-        askPeersForChainUpdates();
+        if (this.peerController.getPeers().size() != 0) {
+            askPeersForChainUpdates();
+        }
     }
 
     private void askPeersForChainUpdates() {
         logger.info("ASK PEERS FOR STATUS UPDATE");
         this.peerController.getPeers()
-                .entrySet().parallelStream()
-                .forEach((entry) -> {
-                    WebSocketSession session = entry.getValue();
+                .values().parallelStream()
+                .forEach(peer -> {
+                    WebSocketSession session = peer.getSession();
                     TextMessage textMessage = new TextMessage(Utils.serialize(new Message(MessageType.GET_STATUS)));
                     try {
                         session.sendMessage(textMessage);
@@ -101,15 +113,12 @@ public class NodeEngine {
 
     private void notifyPeersForNewBlock(Block block) {
         this.peerController.getPeers()
-                .entrySet().parallelStream()
-                .forEach((entry) -> {
-                    Peer peer = entry.getKey();
-                    WebSocketSession session = entry.getValue();
-
+                .values().parallelStream()
+                .forEach((peer) -> {
                     TextMessage textMessage = new TextMessage(Utils.serialize(new Message(MessageType.NEW_BLOCK, block)));
                     try {
                         logger.info(String.format("NOTIFY: PEER WITH ADDRESS: '%s', NEW_BLOCK FOUND!", peer.getUrl()));
-                        session.sendMessage(textMessage);
+                        peer.getSession().sendMessage(textMessage);
                     } catch (IOException e) {
                         logger.error(e.getMessage());
                     }
