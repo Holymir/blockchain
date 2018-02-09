@@ -1,5 +1,6 @@
 package com.softuni.blockchain.node;
 
+import com.google.common.collect.Sets;
 import com.softuni.blockchain.miner.MinerEngine;
 import com.softuni.blockchain.node.socket.Message;
 import com.softuni.blockchain.node.socket.MessageType;
@@ -25,18 +26,15 @@ public class NodeEngine {
     private final PeerController peerController;
     private final NodeController nodeController;
     private final MinerEngine minerEngine;
-    //private Miner miner;
-    //private MiningJob miningJob;
 
     private final Object unconfirmedBlockMutex = new Object();
+    private final Object blockChainMutex = new Object();
 
     @Autowired
     public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine) {
         this.peerController = peerController;
         this.nodeController = nodeController;
         this.minerEngine = minerEngine;
-        //this.miner = miner;
-        //this.miningJob = miningJob;
     }
 
     @Scheduled(fixedDelay = 5_000)
@@ -105,74 +103,14 @@ public class NodeEngine {
             this.nodeController.getUnconfirmedBlocks().clear();
         }
 
-        if (unconfirmedBlocks.size() == 1) {
-            Block block = unconfirmedBlocks.get(0);
-            logger.info(String.format("VERIFY BLOCK: %s", block));
-            if (this.nodeController.verifyBlock(block)) {
-                logger.info(String.format("ADDING BLOCK: %s TO BLOCKCHAIN", block));
-                this.nodeController.getBlockChain().add(block);
-                this.notifyPeersForNewBlock(block);
-            }
-
-            return;
+        List<Block> oldChain;
+        synchronized (blockChainMutex) {
+            oldChain = new ArrayList<>(this.nodeController.getBlockChain());
+            this.nodeController.setBlockChain(this.synchronizeBlockChain(unconfirmedBlocks, new ArrayList<>(oldChain)));
         }
 
-        Map<String, List<Blockchain>> allBlockChainsByHead = new HashMap<>();
-        for (int i = 0; i < unconfirmedBlocks.size() - 1; i++) {
-            Block block = unconfirmedBlocks.get(i);
-            Block nextBlock = unconfirmedBlocks.get(i + 1);
-
-            if (i == 0) {
-                allBlockChainsByHead.put(block.getBlockHash(), new ArrayList<>(Arrays.asList(new Blockchain(block))));
-                continue;
-            }
-
-            if (!block.getBlockHash().equals(nextBlock.getPrevBlockHash())) {
-                if (allBlockChainsByHead.get(block.getBlockHash()) != null) {
-                    allBlockChainsByHead.get(block.getBlockHash()).add(new Blockchain(block));
-                } else {
-                    allBlockChainsByHead.put(block.getBlockHash(), new ArrayList<>(Arrays.asList(new Blockchain(block))));
-                }
-            }
-        }
-
-        int i = 0;
-        while (i < unconfirmedBlocks.size()) {
-            Block block = unconfirmedBlocks.get(i);
-            if (this.nodeController.verifyBlockIntegrity(block)) {
-                allBlockChainsByHead.keySet().forEach(head -> {
-                    allBlockChainsByHead.get(head).forEach(blockchain -> {
-                        if (blockchain.getLastBlock().getBlockHash().equals(block.getPrevBlockHash())) {
-                            blockchain.addBlock(block);
-                        }
-                    });
-                });
-            }
-            i++;
-        }
-
-        // Merge all chains into one! Almighty, the 'da si ebe' one!
-        List<Block> blockChain = this.nodeController.getBlockChain();
-        allBlockChainsByHead.keySet().forEach(headHash -> {
-            allBlockChainsByHead.get(headHash).forEach(subchain -> {
-                Optional<Block> blockInMyChain = blockChain.stream()
-                        .filter(block -> block.getBlockHash().equals(subchain.getFirstBlock().getPrevBlockHash())).findAny();
-                if (blockInMyChain.isPresent()) {
-                    Block block = blockInMyChain.get();
-                    int newLength = subchain.size() + block.getIndex();
-                    if (newLength >= blockChain.size()) {
-                        List<Block> forRemove = blockChain.subList(block.getIndex(), blockChain.size() - 1);
-                        blockChain.removeAll(forRemove);
-                        blockChain.addAll(subchain.getBlocks());
-                    }
-                } else {
-                    if (subchain.size() > blockChain.size()) {
-                        blockChain.clear();
-                        blockChain.addAll(subchain.getBlocks());
-                    }
-                }
-            });
-        });
+        new TreeSet<>(Sets.difference(new HashSet<>(this.nodeController.getBlockChain()), new HashSet<>(oldChain)))
+                .forEach(this::notifyPeersForNewBlock);
     }
 
     private void askPeersForChainUpdates() {
@@ -233,5 +171,41 @@ public class NodeEngine {
                         logger.error(e.getMessage());
                     }
                 });
+    }
+
+
+    public List<Block> synchronizeBlockChain(List<Block> unconfirmedBlocks, List<Block> blockchain) {
+        List<Block> tempChain = new LinkedList<>();
+        for (Block block : unconfirmedBlocks) {
+            logger.info(String.format("VERIFY BLOCK: %s", block));
+            if (this.nodeController.verifyBlock(block, blockchain.get(blockchain.size() - 1))) {
+                logger.info(String.format("ADDING BLOCK: %s TO BLOCKCHAIN", block));
+                blockchain.add(block);
+            } else {
+                tempChain.add(block);
+            }
+        }
+
+        if (!this.checkConsistency(tempChain)) {
+            this.synchronizeBlockChain(tempChain.subList(1, tempChain.size() - 1), new ArrayList<>(Arrays.asList(tempChain.get(0))));
+        }
+
+        if (tempChain.size() < blockchain.size()) {
+            return blockchain;
+        }
+
+        return tempChain;
+    }
+
+    private boolean checkConsistency(List<Block> blockchain) {
+        for (int i = 0; i < blockchain.size() - 1; i++) {
+            Block block = blockchain.get(i);
+            Block nextBlock = blockchain.get(i + 1);
+            if (!nextBlock.getPrevBlockHash().equals(block.getBlockHash())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
