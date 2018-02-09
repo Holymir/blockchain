@@ -10,7 +10,6 @@ public class NodeInfo {
     private long transactions;
     private Balance balance;
     private int difficulty;
-    private MiningJob miningJobs;
 
     public NodeInfo(Node node) {
         this.uuid = node.getUuid();
@@ -20,7 +19,6 @@ public class NodeInfo {
         this.transactions = node.getTransactions().size();
         this.balance = node.getBalance();
         this.difficulty = node.getDifficulty();
-        this.miningJobs = node.getMiningJobs();
     }
 
     public NodeInfo() {
@@ -82,13 +80,6 @@ public class NodeInfo {
         this.difficulty = difficulty;
     }
 
-    public MiningJob getMiningJobs() {
-        return miningJobs;
-    }
-
-    public void setMiningJobs(MiningJob miningJobs) {
-        this.miningJobs = miningJobs;
-    }
 
     @Override
     public String toString() {
@@ -100,7 +91,6 @@ public class NodeInfo {
                 ", transactions=" + transactions +
                 ", balance=" + balance +
                 ", difficulty=" + difficulty +
-                ", miningJobs=" + miningJobs +
                 '}';
     }
 
