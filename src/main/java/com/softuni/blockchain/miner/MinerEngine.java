@@ -6,7 +6,10 @@ import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 
@@ -14,6 +17,28 @@ import java.util.Date;
 public class MinerEngine {
 
     private static final Logger logger = LoggerFactory.getLogger("MINER_ENGINE");
+    private MinerController minerController;
+
+    @Autowired
+    public MinerEngine(MinerController minerController) {
+        this.minerController = minerController;
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    void run() {
+        if (minerController.isMinerStarted) {
+            RestTemplate restTemplate = new RestTemplate();
+            Block miningJob = restTemplate.getForObject("http://" + minerController.address + "/miningJobs", Block.class);
+
+            if (miningJob != null) {
+                Block mined = this.mine(miningJob);
+
+                restTemplate = new RestTemplate();
+                restTemplate.postForObject("http://" + minerController.address + "/mined", mined, Block.class);
+
+            }
+        }
+    }
 
     public Block mine(Block block) {
 
@@ -46,6 +71,7 @@ public class MinerEngine {
         validBlock.setDateCreated(nextTimestamp);
         validBlock.setDifficulty(difficulty);
         validBlock.setNonce(nonce);
+        //validBlock.setExpectedReward(miner.getAddress());
         validBlock.setBlockHash(hashToCheck);
         validBlock.setMinedBy(Node.getUuid());
         return validBlock;

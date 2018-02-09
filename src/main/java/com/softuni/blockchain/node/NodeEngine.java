@@ -1,6 +1,5 @@
 package com.softuni.blockchain.node;
 
-import com.softuni.blockchain.miner.Miner;
 import com.softuni.blockchain.miner.MinerEngine;
 import com.softuni.blockchain.node.socket.Message;
 import com.softuni.blockchain.node.socket.MessageType;
@@ -16,9 +15,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.*;
 
 @Component
@@ -29,16 +25,18 @@ public class NodeEngine {
     private final PeerController peerController;
     private final NodeController nodeController;
     private final MinerEngine minerEngine;
-    private Miner miner;
+    //private Miner miner;
+    //private MiningJob miningJob;
 
     private final Object unconfirmedBlockMutex = new Object();
 
     @Autowired
-    public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine, Miner miner) {
+    public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine) {
         this.peerController = peerController;
         this.nodeController = nodeController;
         this.minerEngine = minerEngine;
-        this.miner = miner;
+        //this.miner = miner;
+        //this.miningJob = miningJob;
     }
 
     @Scheduled(fixedDelay = 5_000)
@@ -48,7 +46,7 @@ public class NodeEngine {
         }
 
         if (this.nodeController.getCandidateBlock() == null) {
-            this.createCandidateBlock();
+            this.nodeController.setCandidateBlock(this.createCandidateBlock());
         }
 
         if (this.peerController.getPeers().size() != 0) {
@@ -192,14 +190,14 @@ public class NodeEngine {
                 });
     }
 
-    private void createCandidateBlock() {
+    private Block createCandidateBlock() {
         logger.info("CREATING CANDIDATE...");
 
         double fee = 5;
         Transaction rewardToMiner = new Transaction();
         rewardToMiner.setFrom("coinBased");
         rewardToMiner.setTransactionHash("coinBased");
-        rewardToMiner.setTo(miner.getAddress());
+        //rewardToMiner.setTo(miner.getAddress());
         rewardToMiner.setValue(fee);
         List<Transaction> transactionsPlusReward = new ArrayList<>(this.nodeController.getPendingTransactions());
         transactionsPlusReward.add(rewardToMiner);
@@ -215,9 +213,12 @@ public class NodeEngine {
         this.nodeController.getPendingTransactions().clear();
         this.nodeController.setCandidateBlock(candidateBlock);
 
-        Block minedBlock = minerEngine.mine(candidateBlock);
-        this.nodeController.getUnconfirmedBlocks().add(minedBlock);
-        this.nodeController.setCandidateBlock(null);
+        //miningJob.addReadyForMiningBlocks(candidateBlock);
+//        Block minedBlock = minerEngine.mine(candidateBlock);
+//        this.nodeController.getUnconfirmedBlocks().add(minedBlock);
+
+//        this.nodeController.setCandidateBlock(null);
+        return candidateBlock;
     }
 
     private void notifyPeersForNewBlock(Block block) {

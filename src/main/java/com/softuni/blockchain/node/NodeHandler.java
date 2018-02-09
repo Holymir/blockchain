@@ -18,6 +18,7 @@ public class NodeHandler {
     private NodeController nodeController;
 
 
+
     @GetMapping("/info")
     public NodeInfo nodeInfo() {
         return new NodeInfo(new Node(peerController, nodeController));
@@ -61,5 +62,18 @@ public class NodeHandler {
     @PostMapping("/node/transactions")
     public Transaction createTransaction(@RequestBody Transaction transaction) {
         return this.nodeController.createTransaction(transaction);
+    }
+
+    @GetMapping("/miningJobs")
+    public Block getBlockForMining() {
+        return this.nodeController.getCandidateBlock();
+    }
+
+    @PostMapping("/mined")
+    public ResponseEntity mined(@RequestBody Block block ) {
+        this.nodeController.getUnconfirmedBlocks().add(block);
+        this.nodeController.setCandidateBlock(null);
+
+        return ResponseEntity.noContent().build();
     }
 }
