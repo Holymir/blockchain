@@ -16,6 +16,9 @@ public class NodeHandler {
 
     @Autowired
     private NodeController nodeController;
+//
+//    @Autowired
+//    private NodeEngine nodeEngine;
 
 
     @GetMapping("/info")
@@ -62,4 +65,9 @@ public class NodeHandler {
     public Transaction createTransaction(@RequestBody Transaction transaction) {
         return this.nodeController.createTransaction(transaction);
     }
+//
+//    @PostMapping("/test")
+//    public List<Block> test(@RequestBody TestBlocks test) {
+//        return this.nodeEngine.synchronizeBlockChain(test.getUnconfirmedBlocks(), test.getBlockchain());
+//    }
 }

@@ -89,18 +89,27 @@ public class NodeController {
         return true;
     }
 
-    public boolean verifyBlockIntegrity(Block block) {
+    // VerifyBlock
+    public boolean verifyBlock(Block block, Block previousBlock) {
+
+        boolean oldNextIndex = previousBlock.getIndex() + 1 == block.getIndex();
+        boolean oldNewHash = previousBlock.getBlockHash().equals(block.getPrevBlockHash());
 
         boolean checkTransactionHash = transactionHash(block);
         boolean checkBlockHash = blockHashChecker(block);
 
+        if (!oldNewHash) {
+            return false;
+        }
+        if (!oldNextIndex) {
+            return false;
+        }
         if (!checkBlockHash) {
             return false;
         }
         if (!checkTransactionHash) {
             return false;
         }
-
         return true;
     }
 
@@ -124,6 +133,10 @@ public class NodeController {
 
     public List<Block> getBlockChain() {
         return blockChain;
+    }
+
+    public void setBlockChain(List<Block> blockChain) {
+        this.blockChain = blockChain;
     }
 
     private Block generateGenesisBlock() {

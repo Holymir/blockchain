@@ -1,10 +1,15 @@
 package com.softuni.blockchain.node.socket;
 
+import com.google.common.collect.Sets;
 import com.softuni.blockchain.node.*;
 import com.softuni.blockchain.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.TreeSet;
 
 public class SocketHandler implements WebSocketHandler {
 
@@ -70,7 +75,9 @@ public class SocketHandler implements WebSocketHandler {
                 break;
             case GET_CHAIN_RESPONSE:
                 logger.debug("GET_CHAIN_RESPONSE");
-                this.nodeController.getUnconfirmedBlocks().addAll(message.getBlockchain());
+                List<Block> blockchain = message.getBlockchain();
+                this.nodeController.getUnconfirmedBlocks()
+                        .addAll(new TreeSet<>(Sets.difference(new HashSet<>(blockchain), new HashSet<>(this.nodeController.getBlockChain()))));
                 break;
             case GET_STATUS:
                 logger.debug("STATUS_REQUEST RECEIVED");
