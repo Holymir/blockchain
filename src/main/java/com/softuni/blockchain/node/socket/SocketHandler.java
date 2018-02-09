@@ -69,13 +69,14 @@ public class SocketHandler implements WebSocketHandler {
                 this.nodeController.getPendingTransactions().addAll(message.getTransactions());
                 break;
             case GET_CHAIN:
-                logger.debug("GET_CHAIN RECEIVED");
+                logger.debug("GET_CHAIN REQUEST RECEIVED");
                 webSocketSession.sendMessage(new TextMessage(
-                        Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE, this.nodeController.getBlockChain(), 0, 0))));
+                        Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE,
+                                new Blockchain(this.nodeController.getBlockChain())))));
                 break;
             case GET_CHAIN_RESPONSE:
                 logger.debug("GET_CHAIN_RESPONSE");
-                List<Block> blockchain = message.getBlockchain();
+                List<Block> blockchain = message.getBlockchain().getBlocks();
                 this.nodeController.getUnconfirmedBlocks()
                         .addAll(new TreeSet<>(Sets.difference(new HashSet<>(blockchain), new HashSet<>(this.nodeController.getBlockChain()))));
                 break;

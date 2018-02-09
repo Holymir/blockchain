@@ -1,6 +1,7 @@
 package com.softuni.blockchain.node.socket;
 
 import com.softuni.blockchain.node.Block;
+import com.softuni.blockchain.node.Blockchain;
 import com.softuni.blockchain.node.NodeInfo;
 import com.softuni.blockchain.node.Transaction;
 
@@ -10,7 +11,7 @@ public class Message {
     private List<Transaction> transactions;
     private MessageType type;
     private Block block;
-    private List<Block> blockchain;
+    private Blockchain blockchain;
     private NodeInfo nodeInfo;
 
     // NEW BLOCK MESSAGE
@@ -26,7 +27,7 @@ public class Message {
     }
 
     // GET_CHAIN RESPONSE MESSAGE
-    public Message(MessageType type, List<Block> blockchain, int from, int to) {
+    public Message(MessageType type, Blockchain blockchain) {
         this.type = type;
         this.blockchain = blockchain;
     }
@@ -35,6 +36,10 @@ public class Message {
     public Message(MessageType type, NodeInfo nodeInfo) {
         this.type = type;
         this.nodeInfo = nodeInfo;
+    }
+
+    public Message(MessageType type, int from, int to) {
+        this.type = type;
     }
 
     public Message(MessageType type) {
@@ -60,11 +65,11 @@ public class Message {
         this.block = block;
     }
 
-    public List<Block> getBlockchain() {
+    public Blockchain getBlockchain() {
         return blockchain;
     }
 
-    public void setBlockchain(List<Block> blockchain) {
+    public void setBlockchain(Blockchain blockchain) {
         this.blockchain = blockchain;
     }
 
