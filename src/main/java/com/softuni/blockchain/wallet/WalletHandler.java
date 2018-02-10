@@ -1,8 +1,8 @@
 package com.softuni.blockchain.wallet;
 
 
-import com.softuni.blockchain.node.RequestTransactionDTO;
-import com.softuni.blockchain.node.Transaction;
+import com.softuni.blockchain.node.model.RequestTransactionDTO;
+import com.softuni.blockchain.node.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

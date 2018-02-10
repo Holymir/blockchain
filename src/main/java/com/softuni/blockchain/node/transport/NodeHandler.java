@@ -1,44 +1,30 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.transport;
 
+import com.softuni.blockchain.node.*;
+import com.softuni.blockchain.node.core.NodeController;
+import com.softuni.blockchain.node.core.PeerController;
+import com.softuni.blockchain.node.model.Balance;
+import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.model.NodeInfo;
+import com.softuni.blockchain.node.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class NodeHandler {
 
     @Autowired
-    private PeerController peerController;
-
-    @Autowired
     private NodeController nodeController;
 
-
+    @Autowired
+    private PeerController peerController;
 
     @GetMapping("/info")
     public NodeInfo nodeInfo() {
         return new NodeInfo(new Node(peerController, nodeController));
-    }
-
-    @GetMapping("/peers")
-    public List<Peer> peer() {
-        return new ArrayList<>(peerController.getPeers().values());
-    }
-
-    @PostMapping("/peers")
-    public ResponseEntity peer(@RequestBody Peer peer) {
-        this.peerController.addPeer(peer);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/peers")
-    public ResponseEntity removePeer(@RequestBody Peer peer) throws IOException {
-        this.peerController.remove(peer);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/balance")
@@ -70,7 +56,7 @@ public class NodeHandler {
     }
 
     @PostMapping("/mined")
-    public ResponseEntity mined(@RequestBody Block block ) {
+    public ResponseEntity mined(@RequestBody Block block) {
         this.nodeController.getUnconfirmedBlocks().add(block);
         this.nodeController.setCandidateBlock(null);
 

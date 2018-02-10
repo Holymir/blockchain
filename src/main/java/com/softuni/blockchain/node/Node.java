@@ -1,5 +1,8 @@
 package com.softuni.blockchain.node;
 
+import com.softuni.blockchain.node.core.NodeController;
+import com.softuni.blockchain.node.core.PeerController;
+import com.softuni.blockchain.node.model.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Collection;
@@ -15,7 +18,7 @@ public class Node {
     private List<Transaction> transactions;
     private Balance balance;
     private int difficulty;
-    //private MiningJob miningJobs;
+    private MiningJob miningJobs;
 
     public Node(PeerController peerController, NodeController nodeController) {
         this.peers = peerController.getPeers().values();
@@ -75,11 +78,11 @@ public class Node {
         this.difficulty = difficulty;
     }
 
-//    public MiningJob getMiningJobs() {
-//        return miningJobs;
-//    }
-//
-//    public void setMiningJobs(MiningJob miningJobs) {
-//        this.miningJobs = miningJobs;
-//    }
+    public MiningJob getMiningJobs() {
+        return miningJobs;
+    }
+
+    public void setMiningJobs(MiningJob miningJobs) {
+        this.miningJobs = miningJobs;
+    }
 }

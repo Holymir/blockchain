@@ -1,6 +1,6 @@
 package com.softuni.blockchain.wallet;
 
-import com.softuni.blockchain.node.Transaction;
+import com.softuni.blockchain.node.model.Transaction;
 import com.softuni.blockchain.utils.Utils;
 import com.softuni.blockchain.wallet.crypto.ECKey;
 import com.softuni.blockchain.wallet.crypto.HashUtil;

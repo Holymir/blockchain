@@ -1,6 +1,6 @@
 package com.softuni.blockchain.miner;
 
-import com.softuni.blockchain.node.Block;
+import com.softuni.blockchain.node.model.Block;
 import com.softuni.blockchain.node.Node;
 import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.slf4j.Logger;

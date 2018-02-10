@@ -1,9 +1,9 @@
-package com.softuni.blockchain.node.socket;
+package com.softuni.blockchain.node.transport.socket;
 
-import com.softuni.blockchain.node.Block;
-import com.softuni.blockchain.node.Blockchain;
-import com.softuni.blockchain.node.NodeInfo;
-import com.softuni.blockchain.node.Transaction;
+import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.model.Blockchain;
+import com.softuni.blockchain.node.model.NodeInfo;
+import com.softuni.blockchain.node.model.Transaction;
 
 import java.util.List;
 

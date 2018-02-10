@@ -1,4 +1,6 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.model;
+
+import com.softuni.blockchain.node.Node;
 
 import java.util.Objects;
 

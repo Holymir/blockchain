@@ -1,9 +1,12 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.core;
 
 import com.google.common.collect.Sets;
 import com.softuni.blockchain.miner.MinerEngine;
-import com.softuni.blockchain.node.socket.Message;
-import com.softuni.blockchain.node.socket.MessageType;
+import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.model.Peer;
+import com.softuni.blockchain.node.model.Transaction;
+import com.softuni.blockchain.node.transport.socket.Message;
+import com.softuni.blockchain.node.transport.socket.MessageType;
 import com.softuni.blockchain.utils.Utils;
 import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.slf4j.Logger;

@@ -1,7 +1,13 @@
-package com.softuni.blockchain.node.socket;
+package com.softuni.blockchain.node.transport.socket;
 
 import com.google.common.collect.Sets;
 import com.softuni.blockchain.node.*;
+import com.softuni.blockchain.node.core.NodeController;
+import com.softuni.blockchain.node.core.PeerController;
+import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.model.Blockchain;
+import com.softuni.blockchain.node.model.NodeInfo;
+import com.softuni.blockchain.node.model.Peer;
 import com.softuni.blockchain.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

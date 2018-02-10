@@ -1,4 +1,4 @@
-package com.softuni.blockchain.node.socket;
+package com.softuni.blockchain.node.transport.socket;
 
 public enum MessageType {
     NEW_BLOCK,

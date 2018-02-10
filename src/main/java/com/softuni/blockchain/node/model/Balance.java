@@ -1,4 +1,4 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.model;
 
 public class Balance {
 

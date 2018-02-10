@@ -1,9 +1,9 @@
 package com.softuni.blockchain.config;
 
 
-import com.softuni.blockchain.node.NodeController;
-import com.softuni.blockchain.node.PeerController;
-import com.softuni.blockchain.node.socket.SocketHandler;
+import com.softuni.blockchain.node.core.NodeController;
+import com.softuni.blockchain.node.core.PeerController;
+import com.softuni.blockchain.node.transport.socket.SocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

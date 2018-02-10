@@ -1,5 +1,7 @@
 package com.softuni.blockchain.node;
 
+import com.softuni.blockchain.node.model.Block;
+
 import java.util.List;
 
 public class TestBlocks {

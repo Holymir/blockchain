@@ -1,7 +1,7 @@
 package com.softuni.blockchain.explorer;
 
-import com.softuni.blockchain.node.Block;
-import com.softuni.blockchain.node.NodeController;
+import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.core.NodeController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

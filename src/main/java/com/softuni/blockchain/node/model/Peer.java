@@ -1,4 +1,4 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.web.socket.WebSocketSession;
@@ -58,14 +58,12 @@ public class Peer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Peer peer = (Peer) o;
-        return Objects.equals(url, peer.url) &&
-                Objects.equals(sessionId, peer.sessionId) &&
-                Objects.equals(uuid, peer.uuid);
+        return Objects.equals(url, peer.url);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(url, sessionId, uuid);
+        return Objects.hash(url);
     }
 }

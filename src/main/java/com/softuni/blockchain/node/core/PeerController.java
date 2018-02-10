@@ -1,7 +1,8 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.core;
 
 
-import com.softuni.blockchain.node.socket.SocketHandler;
+import com.softuni.blockchain.node.model.Peer;
+import com.softuni.blockchain.node.transport.socket.SocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,13 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class PeerController {
@@ -24,17 +30,18 @@ public class PeerController {
     private NodeController nodeController;
 
     private Map<String, Peer> peers = new HashMap<>();
+    private CompletableFuture<List<Peer>> discoveryFuture;
 
     public Map<String, Peer> getPeers() {
         return peers;
     }
 
-    public void addPeer(Peer peer) {
-        logger.debug(String.format("Peer with address: '%s' received: ", peer.getUrl()));
-        this.connectToPeer(peer);
+    public void addPeers(List<Peer> peers) {
+        peers.stream().map(a -> new Peer(a.getUrl() + ":8080")).forEach(this::connectToPeer);
     }
 
     private void connectToPeer(Peer peer) {
+        logger.debug(String.format("Peer with address: '%s' received: ", peer.getUrl()));
         WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketHandler sessionHandler = new SocketHandler(this, this.nodeController);
 
@@ -54,6 +61,59 @@ public class PeerController {
     public void remove(Peer peer) throws IOException {
         peer.getSession().close();
         this.getPeers().remove(peer.getSessionId());
+    }
+
+
+    public List<Peer> discoverPeers(String host) throws Exception {
+        if (this.discoveryFuture != null) {
+            if (this.discoveryFuture.isDone()) {
+                List<Peer> peers = this.discoveryFuture.get();
+                this.discoveryFuture = null;
+                return peers;
+            } else {
+                throw new RuntimeException("Discovery is running...");
+            }
+        }
+
+        synchronized (this) {
+            this.discoveryFuture = CompletableFuture.supplyAsync(() -> {
+                return this.discovery(host);
+            });
+        }
+
+        return new ArrayList<>();
+    }
+
+    private List<Peer> discovery(String host) {
+        InetAddress localhost = null;
+        try {
+            localhost = InetAddress.getByName(host);
+
+            byte[] ip = localhost.getAddress();
+
+            List<Peer> addresses = new ArrayList<>();
+
+            for (int i = 1; i <= 254; i++) {
+                try {
+                    ip[3] = (byte) i;
+                    InetAddress address = InetAddress.getByAddress(ip);
+                    if (address.isReachable(100)) {
+                        String output = address.toString().substring(1);
+                        logger.info(output + " is on the network");
+                        addresses.add(new Peer(output));
+                    }
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage());
+                }
+            }
+
+            return addresses;
+
+        } catch (UnknownHostException e) {
+            logger.error(e.getMessage());
+        }
+
+        return new ArrayList<>();
     }
 
 //    private void addMeAsPeer(Peer peer) {

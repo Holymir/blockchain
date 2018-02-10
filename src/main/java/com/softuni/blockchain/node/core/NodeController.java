@@ -1,6 +1,9 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.core;
 
 
+import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.model.NodeInfo;
+import com.softuni.blockchain.node.model.Transaction;
 import com.softuni.blockchain.utils.Utils;
 import com.softuni.blockchain.wallet.WalletController;
 import com.softuni.blockchain.wallet.crypto.HashUtil;

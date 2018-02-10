@@ -1,4 +1,4 @@
-package com.softuni.blockchain.node;
+package com.softuni.blockchain.node.model;
 
 import java.util.LinkedList;
 import java.util.List;
