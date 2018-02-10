@@ -76,15 +76,14 @@ public class PeerController {
         }
 
         synchronized (this) {
-            this.discoveryFuture = CompletableFuture.supplyAsync(() -> {
-                return this.discovery(host);
-            });
+            this.discoveryFuture = CompletableFuture.supplyAsync(() -> this.discovery(host));
         }
 
         return new ArrayList<>();
     }
 
     private List<Peer> discovery(String host) {
+        logger.info("Discovery is starting...");
         InetAddress localhost = null;
         try {
             localhost = InetAddress.getByName(host);
@@ -99,14 +98,16 @@ public class PeerController {
                     InetAddress address = InetAddress.getByAddress(ip);
                     if (address.isReachable(100)) {
                         String output = address.toString().substring(1);
-                        logger.info(output + " is on the network");
-                        addresses.add(new Peer(output));
+                        logger.info(output + " is discovered on the network.");
+                        if (!output.equals(host)) {
+                            addresses.add(new Peer(output));
+                        }
                     }
                 } catch (Exception ex) {
                     logger.error(ex.getMessage());
                 }
             }
-
+            logger.info("Discovery has ended.");
             return addresses;
 
         } catch (UnknownHostException e) {
@@ -115,13 +116,5 @@ public class PeerController {
 
         return new ArrayList<>();
     }
-
-//    private void addMeAsPeer(Peer peer) {
-//        System.out.println(String.format("addMeAsPeer with Peer: %s", peer));
-//        if (!peer.equals(me) && !peers.contains(peer)) {
-//            RestTemplate restTemplate = new RestTemplate();
-//            restTemplate.postForObject("http://" + peer.getUrl() + "/peers", this.me, Peer[].class);
-//        }
-//    }
 }
 

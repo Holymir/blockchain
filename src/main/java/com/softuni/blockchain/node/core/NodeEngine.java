@@ -1,17 +1,13 @@
 package com.softuni.blockchain.node.core;
 
 import com.google.common.collect.Sets;
-import com.softuni.blockchain.miner.MinerEngine;
 import com.softuni.blockchain.node.model.Block;
 import com.softuni.blockchain.node.model.Peer;
-import com.softuni.blockchain.node.model.Transaction;
 import com.softuni.blockchain.node.transport.socket.Message;
 import com.softuni.blockchain.node.transport.socket.MessageType;
 import com.softuni.blockchain.utils.Utils;
-import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -28,26 +24,20 @@ public class NodeEngine {
 
     private final PeerController peerController;
     private final NodeController nodeController;
-    private final MinerEngine minerEngine;
 
     private final Object unconfirmedBlockMutex = new Object();
     private final Object blockChainMutex = new Object();
 
     @Autowired
-    public NodeEngine(PeerController peerController, NodeController nodeController, MinerEngine minerEngine) {
+    public NodeEngine(PeerController peerController, NodeController nodeController) {
         this.peerController = peerController;
         this.nodeController = nodeController;
-        this.minerEngine = minerEngine;
     }
 
     @Scheduled(fixedDelay = 5_000)
     synchronized void run() {
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
             this.synchronizeBlockChain();
-        }
-
-        if (this.nodeController.getCandidateBlock() == null) {
-            this.nodeController.setCandidateBlock(this.createCandidateBlock());
         }
 
         if (this.peerController.getPeers().size() != 0) {
@@ -129,37 +119,6 @@ public class NodeEngine {
                         logger.error(e.getMessage());
                     }
                 });
-    }
-
-    private Block createCandidateBlock() {
-        logger.info("CREATING CANDIDATE...");
-
-        double fee = 5;
-        Transaction rewardToMiner = new Transaction();
-        rewardToMiner.setFrom("coinBased");
-        rewardToMiner.setTransactionHash("coinBased");
-        //rewardToMiner.setTo(miner.getAddress());
-        rewardToMiner.setValue(fee);
-        List<Transaction> transactionsPlusReward = new ArrayList<>(this.nodeController.getPendingTransactions());
-        transactionsPlusReward.add(rewardToMiner);
-
-
-        Block candidateBlock = new Block();
-        candidateBlock.setIndex(this.nodeController.getBlockChain().size());
-        candidateBlock.setExpectedReward(fee);
-        candidateBlock.setDifficulty(5);
-        candidateBlock.setBlockDataHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(transactionsPlusReward).getBytes())));
-        candidateBlock.setPrevBlockHash(nodeController.getLastBlock().getBlockHash());
-        candidateBlock.setTransactions(transactionsPlusReward);
-        this.nodeController.getPendingTransactions().clear();
-        this.nodeController.setCandidateBlock(candidateBlock);
-
-        //miningJob.addReadyForMiningBlocks(candidateBlock);
-//        Block minedBlock = minerEngine.mine(candidateBlock);
-//        this.nodeController.getUnconfirmedBlocks().add(minedBlock);
-
-//        this.nodeController.setCandidateBlock(null);
-        return candidateBlock;
     }
 
     private void notifyPeersForNewBlock(Block block) {

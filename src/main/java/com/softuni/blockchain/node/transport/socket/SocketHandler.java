@@ -94,7 +94,7 @@ public class SocketHandler implements WebSocketHandler {
             case STATUS_RESPONSE:
                 logger.debug("STATUS_RESPONSE RECEIVED");
                 Peer peer = this.peerController.getPeers().get(webSocketSession.getId());
-                peer.setUuid(message.getNodeInfo().getUuid());
+                peer.setUuid(message.getNodeInfo().getAddress());
                 this.nodeController.getStatuses().add(message.getNodeInfo());
                 break;
         }

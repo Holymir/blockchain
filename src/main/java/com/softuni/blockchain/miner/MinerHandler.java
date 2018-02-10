@@ -2,12 +2,10 @@ package com.softuni.blockchain.miner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/miner")
 public class MinerHandler {
 
     private MinerController minerController;
@@ -17,30 +15,21 @@ public class MinerHandler {
         this.minerController = minerController;
     }
 
-    @PostMapping("/minerAddress")
-    public void addressToAdd(@RequestBody String address) {
-        this.minerController.getMiner().setAddress(address);
+    @PostMapping("/mine")
+    public ResponseEntity mine() {
+        this.minerController.setShouldMine(true);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/minerAddress")
-    public String showAddress() {
-        return this.minerController.getMiner().getAddress();
-    }
-
-    @PostMapping("/startMine")
-    public ResponseEntity startMine() {
-        this.minerController.isMinerStarted = true;
-        return  ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/stopMine")
+    @DeleteMapping("/mine")
     public ResponseEntity stopMine() {
-        this.minerController.isMinerStarted = false;
-        return  ResponseEntity.ok().build();
+        this.minerController.setShouldMine(false);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/mineFor")
-    public void mineFor(@RequestBody String address) {
-        this.minerController.address = address;
+    @PostMapping("/config")
+    public ResponseEntity config(@RequestBody Miner miner) {
+        this.minerController.setMinerConfig(miner);
+        return ResponseEntity.ok().build();
     }
 }

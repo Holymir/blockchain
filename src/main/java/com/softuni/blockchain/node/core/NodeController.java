@@ -2,11 +2,15 @@ package com.softuni.blockchain.node.core;
 
 
 import com.softuni.blockchain.node.model.Block;
+import com.softuni.blockchain.node.model.MiningJob;
 import com.softuni.blockchain.node.model.NodeInfo;
 import com.softuni.blockchain.node.model.Transaction;
 import com.softuni.blockchain.utils.Utils;
+import com.softuni.blockchain.wallet.Wallet;
 import com.softuni.blockchain.wallet.WalletController;
 import com.softuni.blockchain.wallet.crypto.HashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,24 +21,28 @@ import java.util.*;
 @Component
 public class NodeController {
 
-    private List<Transaction> pendingTransactions;
-    private Set<Block> unconfirmedBlocks;
-    private List<Block> blockChain;
-    private Block candidateBlock;
-    private Set<NodeInfo> statuses;
+    private static final Logger logger = LoggerFactory.getLogger("NODE");
+
+    private List<Transaction> pendingTransactions = new ArrayList<>();
+    private Set<Block> unconfirmedBlocks = Collections.synchronizedSet(new TreeSet<>());
+    private List<Block> blockChain = Collections.synchronizedList(new ArrayList<>());
+    private Set<NodeInfo> statuses = new HashSet<>();
+    private Wallet nodeWallet;
+    private Map<String, Block> miningJobs = new HashMap<>();
 
     private final WalletController walletController;
+
+    private long reward;
+    private int difficulty;
 
     @Autowired
     public NodeController(WalletController walletController) {
         this.walletController = walletController;
-
-        this.blockChain = Collections.synchronizedList(new ArrayList<>());
-        this.unconfirmedBlocks = Collections.synchronizedSet(new TreeSet<>());
-
-        this.pendingTransactions = new ArrayList<>();
-        this.statuses = new HashSet<>();
+        this.nodeWallet = walletController.generateWallet();
         this.blockChain.add(generateGenesisBlock());
+
+        this.reward = 50;
+        this.difficulty = 5;
     }
 
     public Transaction createTransaction(Transaction transaction) {
@@ -43,9 +51,13 @@ public class NodeController {
         }
         this.pendingTransactions.add(transaction);
         transaction.setDateReceived(Instant.now().toEpochMilli());
-        transaction.setTransactionHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(transaction).getBytes())));
+        transaction.setTransactionHash(this.getTransactionHash(transaction));
 
         return transaction;
+    }
+
+    private String getTransactionHash(Transaction transaction) {
+        return "0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(transaction).getBytes()));
     }
 
     private boolean verifyTransaction(Transaction transaction) {
@@ -64,8 +76,31 @@ public class NodeController {
         return this.unconfirmedBlocks;
     }
 
-    public Block getCandidateBlock() {
-        return candidateBlock;
+    public MiningJob createMiningJob(String minerAddress) {
+        MiningJob miningJob = new MiningJob();
+        miningJob.setMiner(minerAddress);
+        Block candidateBlock = this.createCandidateBlock(minerAddress);
+        miningJob.setBlock(candidateBlock.getBlockForMiner());
+        miningJob.setExpectedReward(this.reward);
+        String id = Hex.toHexString(HashUtil.sha256(Utils.serialize(miningJob).getBytes()));
+        miningJob.setId(id);
+        this.miningJobs.put(id, candidateBlock);
+
+        return miningJob;
+    }
+
+    public void acceptBlockFromMiner(String miningJob, Block blockReceivedFromMiner) {
+        Block blockSentToMiner = this.miningJobs.getOrDefault(miningJob, null);
+        if (blockSentToMiner == null) {
+            throw new RuntimeException("Job not found!");
+        }
+
+        this.unconfirmedBlocks.add(this.generateBlock(blockSentToMiner, blockReceivedFromMiner));
+        this.miningJobs.remove(miningJob);
+    }
+
+    public List<String> getMiningJobs() {
+        return new ArrayList<>(miningJobs.keySet());
     }
 
     // VerifyBlock
@@ -143,7 +178,6 @@ public class NodeController {
     }
 
     private Block generateGenesisBlock() {
-
         Block block = new Block();
         block.setIndex(0);
         block.setBlockHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(block).getBytes())));
@@ -152,11 +186,49 @@ public class NodeController {
         return block;
     }
 
-    public void setCandidateBlock(Block candidateBlock) {
-        this.candidateBlock = candidateBlock;
+    public Set<NodeInfo> getStatuses() {
+        return statuses;
     }
 
-    synchronized public Set<NodeInfo> getStatuses() {
-        return statuses;
+    public String getAddress() {
+        return this.nodeWallet.getAddress();
+    }
+
+    private Block createCandidateBlock(String minerAddress) {
+        logger.info("Create candidate block for miner: " + minerAddress);
+
+        ArrayList<Transaction> transactions = new ArrayList<>(this.pendingTransactions);
+        transactions.add(this.createCoinbaseTransaction(minerAddress));
+
+        Block candidateBlock = new Block();
+        candidateBlock.setIndex(this.getBlockChain().size());
+        candidateBlock.setReward(this.reward);
+        candidateBlock.setDifficulty(this.difficulty);
+        candidateBlock.setBlockDataHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(transactions).getBytes())));
+        candidateBlock.setPrevBlockHash(this.getLastBlock().getBlockHash());
+        candidateBlock.setTransactions(transactions);
+        candidateBlock.setMinedBy(this.nodeWallet.getAddress());
+
+        return candidateBlock;
+    }
+
+    private Transaction createCoinbaseTransaction(String minerAddress) {
+        Transaction transaction = new Transaction();
+        transaction.setFrom(this.nodeWallet.getAddress());
+        transaction.setTo(minerAddress);
+        transaction.setValue(this.reward);
+
+        transaction = this.walletController.signTransaction(transaction, this.nodeWallet);
+        transaction.setTransactionHash(this.getTransactionHash(transaction));
+
+        return transaction;
+    }
+
+    private Block generateBlock(Block blockSentToMiner, Block blockReceivedFromMiner) {
+        blockSentToMiner.setDateCreated(blockReceivedFromMiner.getDateCreated());
+        blockSentToMiner.setNonce(blockReceivedFromMiner.getNonce());
+        blockSentToMiner.setBlockHash(blockReceivedFromMiner.getBlockHash());
+
+        return blockSentToMiner;
     }
 }

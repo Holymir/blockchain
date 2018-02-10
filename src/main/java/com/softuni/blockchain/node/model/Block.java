@@ -2,47 +2,22 @@ package com.softuni.blockchain.node.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class Block implements Comparable<Block> {
 
     private int index;
+    private String prevBlockHash;
+    private String blockDataHash;
+    private int transactionsIncluded;
     private List<Transaction> transactions;
-    private double expectedReward;
-    private int difficulty;         //number
-    private String prevBlockHash;   //hex_number
-    private String minedBy;         //address
-    private String blockDataHash;   //address
+    private String minedBy;
+    private int difficulty;
+    private long reward;
 
-
-    private Long nonce;             //number
-    private Long dateCreated;       //timestamp
-    private String blockHash;       //hex_number
-
-    public Block() {
-        this.transactions = new LinkedList<>();
-    }
-
-    @JsonIgnore
-    public Block getBlockForMining() {
-
-        Block block = new Block();
-        block.setIndex(this.index);
-        block.setExpectedReward(this.expectedReward);
-        block.setBlockDataHash(this.blockDataHash);
-        block.setDifficulty(this.difficulty);
-
-        return block;
-    }
-
-    public double getExpectedReward() {
-        return expectedReward;
-    }
-
-    public void setExpectedReward(double expectedReward) {
-        this.expectedReward = expectedReward;
-    }
+    private Long nonce;
+    private Long dateCreated;
+    private String blockHash;
 
     public int getIndex() {
         return index;
@@ -116,15 +91,31 @@ public class Block implements Comparable<Block> {
         this.blockHash = blockHash;
     }
 
+    public int getTransactionsIncluded() {
+        return transactions == null ? 0 : this.transactions.size();
+    }
+
+    public void setTransactionsIncluded(int transactionsIncluded) {
+        this.transactionsIncluded = transactionsIncluded;
+    }
+
+    public long getReward() {
+        return reward;
+    }
+
+    public void setReward(long reward) {
+        this.reward = reward;
+    }
+
     @Override
     public String toString() {
         return "Block{" +
                 "index=" + index +
-                ", minedBy='" + (minedBy == null ?  "null": minedBy.substring(minedBy.length() - 5)) + '\'' +
+                ", minedBy='" + (minedBy == null ? "null" : minedBy.substring(minedBy.length() - 5)) + '\'' +
                 ", nonce=" + nonce +
                 ", dateCreated=" + dateCreated +
-                ", blockHash='" + blockHash.substring(blockHash.length() - 5) + '\'' +
-                ", Transactions='" + transactions.size() + '\'' +
+                ", blockHash='" + (blockHash == null ? "null" : blockHash.substring(blockHash.length() - 5)) + '\'' +
+                ", Transactions='" + (transactions == null ? "0" : this.transactions.size()) + '\'' +
                 '}';
     }
 
@@ -146,5 +137,18 @@ public class Block implements Comparable<Block> {
         }
 
         return 0;
+    }
+
+    @JsonIgnore
+    public Block getBlockForMiner() {
+        Block block = new Block();
+
+        block.setIndex(this.index);
+        block.setDifficulty(this.difficulty);
+        block.setPrevBlockHash(this.prevBlockHash);
+        block.setBlockDataHash(this.blockDataHash);
+        block.setTransactionsIncluded(this.transactionsIncluded);
+
+        return block;
     }
 }

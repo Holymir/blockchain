@@ -3,10 +3,7 @@ package com.softuni.blockchain.node.transport;
 import com.softuni.blockchain.node.*;
 import com.softuni.blockchain.node.core.NodeController;
 import com.softuni.blockchain.node.core.PeerController;
-import com.softuni.blockchain.node.model.Balance;
-import com.softuni.blockchain.node.model.Block;
-import com.softuni.blockchain.node.model.NodeInfo;
-import com.softuni.blockchain.node.model.Transaction;
+import com.softuni.blockchain.node.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,19 +24,6 @@ public class NodeHandler {
         return new NodeInfo(new Node(peerController, nodeController));
     }
 
-    @GetMapping("/balance")
-    public Balance balance() {
-        return new Balance();
-    }
-
-    @GetMapping("/node/transactions/{transactionHashId}/info")
-    public Transaction transaction(@PathVariable String transactionHashId) {
-        Transaction transaction = new Transaction();
-        transaction.setTransactionHash(transactionHashId);
-
-        return transaction;
-    }
-
     @GetMapping("/node/transactions/pending")
     public List<Transaction> getPendingTransaction() {
         return this.nodeController.getPendingTransactions();
@@ -50,16 +34,14 @@ public class NodeHandler {
         return this.nodeController.createTransaction(transaction);
     }
 
-    @GetMapping("/miningJobs")
-    public Block getBlockForMining() {
-        return this.nodeController.getCandidateBlock();
+    @GetMapping("/mining/get-block/{minerAddress}")
+    public MiningJob getBlockForMining(@PathVariable String minerAddress) {
+        return this.nodeController.createMiningJob(minerAddress);
     }
 
-    @PostMapping("/mined")
-    public ResponseEntity mined(@RequestBody Block block) {
-        this.nodeController.getUnconfirmedBlocks().add(block);
-        this.nodeController.setCandidateBlock(null);
-
-        return ResponseEntity.noContent().build();
+    @PostMapping("/mining/submit-block/{miningJob}")
+    public ResponseEntity submitBlock(@PathVariable String miningJob, @RequestBody Block block) {
+        this.nodeController.acceptBlockFromMiner(miningJob, block);
+        return ResponseEntity.ok().build();
     }
 }

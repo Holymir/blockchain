@@ -20,7 +20,7 @@ public class WalletHandler {
     }
 
     @PostMapping("/transactions/sign")
-    public Transaction createTransaction(@RequestBody RequestTransactionDTO transactionDTO) {
-        return this.walletController.createTransaction(transactionDTO.getTransaction(), transactionDTO.getWallet());
+    public Transaction sign(@RequestBody RequestTransactionDTO transactionDTO) {
+        return this.walletController.signTransaction(transactionDTO.getTransaction(), transactionDTO.getWallet());
     }
 }

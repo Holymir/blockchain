@@ -6,7 +6,7 @@ public class Transaction {
 
     private String from;            //address
     private String to;              //address
-    private Double value;           //number
+    private Long value;           //number
 
 
     private String senderPubKey;    //hex_number
@@ -42,11 +42,11 @@ public class Transaction {
         this.to = to;
     }
 
-    public Double getValue() {
+    public Long getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(Long value) {
         this.value = value;
     }
 

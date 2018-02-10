@@ -39,7 +39,7 @@ public class WalletController {
         return false;
     }
 
-    public Transaction createTransaction(Transaction transaction, Wallet wallet) {
+    public Transaction signTransaction(Transaction transaction, Wallet wallet) {
         String signMessage = signMessage(Utils.serialize(transaction.getCorePart()), wallet.getPrivateKey());
         transaction.setSenderPubKey(wallet.getPublicKey());
         transaction.setSenderSignature(signMessage);

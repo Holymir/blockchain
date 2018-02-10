@@ -1,7 +1,7 @@
 package com.softuni.blockchain.miner;
 
 import com.softuni.blockchain.node.model.Block;
-import com.softuni.blockchain.node.Node;
+import com.softuni.blockchain.node.model.MiningJob;
 import com.softuni.blockchain.wallet.crypto.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,24 +24,24 @@ public class MinerEngine {
         this.minerController = minerController;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     void run() {
-        if (minerController.isMinerStarted) {
+        if (this.minerController.getShouldMine()) {
             RestTemplate restTemplate = new RestTemplate();
-            Block miningJob = restTemplate.getForObject("http://" + minerController.address + "/miningJobs", Block.class);
+            MiningJob miningJob = restTemplate.getForObject("http://" + minerController.getMinerConfig().getNode() +
+                    "/mining/get-block/" + this.minerController.getMinerConfig().getWallet(), MiningJob.class);
 
             if (miningJob != null) {
-                Block mined = this.mine(miningJob);
+                Block mined = this.mine(miningJob.getBlock());
 
                 restTemplate = new RestTemplate();
-                restTemplate.postForObject("http://" + minerController.address + "/mined", mined, Block.class);
-
+                restTemplate.postForObject("http://" + minerController.getMinerConfig().getNode()
+                        + "/mining/submit-block/" + miningJob.getId(), mined, Block.class);
             }
         }
     }
 
-    public Block mine(Block block) {
-
+    private Block mine(Block block) {
         long nonce = 0;
         int difficulty = block.getDifficulty();
 
@@ -64,18 +64,12 @@ public class MinerEngine {
         logger.info("HashFound: " + hashToCheck);
 
         Block validBlock = new Block();
-        validBlock.setTransactions(block.getTransactions());
-        validBlock.setIndex(index);
-        validBlock.setPrevBlockHash(previousBlockHash);
-        validBlock.setBlockDataHash(thisDataBlockHash);
-        validBlock.setDateCreated(nextTimestamp);
-        validBlock.setDifficulty(difficulty);
-        validBlock.setNonce(nonce);
-        //validBlock.setExpectedReward(miner.getAddress());
-        validBlock.setBlockHash(hashToCheck);
-        validBlock.setMinedBy(Node.getUuid());
-        return validBlock;
 
+        validBlock.setDateCreated(nextTimestamp);
+        validBlock.setNonce(nonce);
+        validBlock.setBlockHash(hashToCheck);
+
+        return validBlock;
     }
 
     private String generateRepeatingString(Integer n) {

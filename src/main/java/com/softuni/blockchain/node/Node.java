@@ -3,31 +3,31 @@ package com.softuni.blockchain.node;
 import com.softuni.blockchain.node.core.NodeController;
 import com.softuni.blockchain.node.core.PeerController;
 import com.softuni.blockchain.node.model.*;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 public class Node {
 
-    private static final String uuid = DigestUtils.sha256Hex(UUID.randomUUID().toString());
+    private String address;
     private String about;
     private Collection<Peer> peers;
     private List<Block> blocks;
     private List<Transaction> transactions;
     private Balance balance;
     private int difficulty;
-    private MiningJob miningJobs;
+    private List<String> miningJobs;
 
     public Node(PeerController peerController, NodeController nodeController) {
+        this.address = nodeController.getAddress();
         this.peers = peerController.getPeers().values();
         this.blocks = nodeController.getBlockChain();
         this.transactions = nodeController.getPendingTransactions();
+        this.miningJobs = nodeController.getMiningJobs();
     }
 
-    public static String getUuid() {
-        return uuid;
+    public String getAddress() {
+        return address;
     }
 
     public String getAbout() {
@@ -78,11 +78,11 @@ public class Node {
         this.difficulty = difficulty;
     }
 
-    public MiningJob getMiningJobs() {
+    public List<String> getMiningJobs() {
         return miningJobs;
     }
 
-    public void setMiningJobs(MiningJob miningJobs) {
+    public void setMiningJobs(List<String> miningJobs) {
         this.miningJobs = miningJobs;
     }
 }

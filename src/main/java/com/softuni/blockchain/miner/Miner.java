@@ -1,21 +1,22 @@
 package com.softuni.blockchain.miner;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class Miner {
+    private String node;
+    private String wallet;
 
-    private String address;
-
-    public Miner() {
-        this.address = address;
+    public String getNode() {
+        return node;
     }
 
-    public String getAddress() {
-        return address;
+    public void setNode(String node) {
+        this.node = node;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public String getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(String wallet) {
+        this.wallet = wallet;
     }
 }
