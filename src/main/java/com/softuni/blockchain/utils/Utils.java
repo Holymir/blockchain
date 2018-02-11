@@ -27,7 +27,6 @@ public class Utils {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
         }
 
         throw new RuntimeException(String.format("Unable to Serialize %s object", object));
@@ -37,7 +36,6 @@ public class Utils {
         try {
             return objectMapper.readValue(serializedObject, type);
         } catch (IOException e) {
-            e.printStackTrace();
         }
 
         throw new RuntimeException(String.format("Unable to Deserialize %s from string.", type));

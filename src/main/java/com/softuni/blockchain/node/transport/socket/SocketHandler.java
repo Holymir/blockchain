@@ -45,58 +45,62 @@ public class SocketHandler implements WebSocketHandler {
     }
 
     @Override
-    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
-        StringBuilder stringBuilder = this.partialMessage.get();
-        if (stringBuilder != null) {
-            stringBuilder.append(webSocketMessage.getPayload());
-        } else {
-            stringBuilder = new StringBuilder();
-            stringBuilder.append(webSocketMessage.getPayload());
-            this.partialMessage.set(stringBuilder);
-        }
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) {
+        try {
+            StringBuilder stringBuilder = this.partialMessage.get();
+            if (stringBuilder != null) {
+                stringBuilder.append(webSocketMessage.getPayload());
+            } else {
+                stringBuilder = new StringBuilder();
+                stringBuilder.append(webSocketMessage.getPayload());
+                this.partialMessage.set(stringBuilder);
+            }
 
-        if (!webSocketMessage.isLast()) {
-            return;
-        }
+            if (!webSocketMessage.isLast()) {
+                return;
+            }
 
-        this.partialMessage.remove();
+            this.partialMessage.remove();
 
-        Message message = Utils.deserialize(Message.class, stringBuilder.toString());
-        switch (message.getType()) {
-            case NEW_BLOCK:
-                logger.debug(String.format("NEW BLOCK NOTIFICATION RECEIVED!!! BLOCK INDEX: %s", message.getBlock().getIndex()));
-                if (this.nodeController.getLastBlock().getIndex() >= message.getBlock().getIndex()) {
-                    logger.debug("DO NOTING, ALREADY WITH LONGEST CHAIN");
+            Message message = Utils.deserialize(Message.class, stringBuilder.toString());
+            switch (message.getType()) {
+                case NEW_BLOCK:
+                    logger.debug(String.format("NEW BLOCK NOTIFICATION RECEIVED!!! BLOCK INDEX: %s", message.getBlock().getIndex()));
+                    if (this.nodeController.getLastBlock().getIndex() >= message.getBlock().getIndex()) {
+                        logger.debug("DO NOTING, ALREADY WITH LONGEST CHAIN");
+                        break;
+                    }
+                    this.nodeController.getUnconfirmedBlocks().add((message.getBlock()));
                     break;
-                }
-                this.nodeController.getUnconfirmedBlocks().add((message.getBlock()));
-                break;
-            case NEW_TRANSACTIONS:
-                this.nodeController.getPendingTransactions().addAll(message.getTransactions());
-                break;
-            case GET_CHAIN:
-                logger.debug("GET_CHAIN REQUEST RECEIVED");
-                webSocketSession.sendMessage(new TextMessage(
-                        Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE,
-                                new Blockchain(this.nodeController.getBlockChain())))));
-                break;
-            case GET_CHAIN_RESPONSE:
-                logger.debug("GET_CHAIN_RESPONSE");
-                List<Block> blockchain = message.getBlockchain().getBlocks();
-                this.nodeController.getUnconfirmedBlocks()
-                        .addAll(new TreeSet<>(Sets.difference(new HashSet<>(blockchain), new HashSet<>(this.nodeController.getBlockChain()))));
-                break;
-            case GET_STATUS:
-                logger.debug("STATUS_REQUEST RECEIVED");
-                webSocketSession.sendMessage(new TextMessage(Utils.serialize(new Message(MessageType.STATUS_RESPONSE,
-                        new NodeInfo(new Node(this.peerController, this.nodeController))))));
-                break;
-            case STATUS_RESPONSE:
-                logger.debug("STATUS_RESPONSE RECEIVED");
-                Peer peer = this.peerController.getPeers().get(webSocketSession.getId());
-                peer.setUuid(message.getNodeInfo().getAddress());
-                this.nodeController.getStatuses().add(message.getNodeInfo());
-                break;
+                case NEW_TRANSACTIONS:
+                    this.nodeController.getPendingTransactions().addAll(message.getTransactions());
+                    break;
+                case GET_CHAIN:
+                    logger.debug("GET_CHAIN REQUEST RECEIVED");
+                    webSocketSession.sendMessage(new TextMessage(
+                            Utils.serialize(new Message(MessageType.GET_CHAIN_RESPONSE,
+                                    new Blockchain(this.nodeController.getBlockChain())))));
+                    break;
+                case GET_CHAIN_RESPONSE:
+                    logger.debug("GET_CHAIN_RESPONSE");
+                    List<Block> blockchain = message.getBlockchain().getBlocks();
+                    this.nodeController.getUnconfirmedBlocks()
+                            .addAll(new TreeSet<>(Sets.difference(new HashSet<>(blockchain), new HashSet<>(this.nodeController.getBlockChain()))));
+                    break;
+                case GET_STATUS:
+                    logger.debug("STATUS_REQUEST RECEIVED");
+                    webSocketSession.sendMessage(new TextMessage(Utils.serialize(new Message(MessageType.STATUS_RESPONSE,
+                            new NodeInfo(new Node(this.peerController, this.nodeController))))));
+                    break;
+                case STATUS_RESPONSE:
+                    logger.debug("STATUS_RESPONSE RECEIVED");
+                    Peer peer = this.peerController.getPeers().get(webSocketSession.getId());
+                    peer.setUuid(message.getNodeInfo().getAddress());
+                    this.nodeController.getStatuses().add(message.getNodeInfo());
+                    break;
+            }
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
         }
     }
 
