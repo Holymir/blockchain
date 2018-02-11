@@ -48,7 +48,7 @@ public class NodeEngine {
             this.askPeersForBlocks();
         }
 
-        if (!this.nodeController.getPendingTransactions().isEmpty()) {
+        if (!this.nodeController.getPendingTransactions().isEmpty() && !this.peerController.getPeers().isEmpty()) {
             this.broadcastTransactions();
         }
     }

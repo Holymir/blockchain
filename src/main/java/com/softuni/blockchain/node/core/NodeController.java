@@ -35,6 +35,8 @@ public class NodeController {
     private long reward;
     private int difficulty;
 
+    private static final String COIN_GENERATION = "coin-generation";
+
     @Autowired
     public NodeController(WalletController walletController) {
         this.walletController = walletController;
@@ -47,7 +49,7 @@ public class NodeController {
 
     public Transaction createTransaction(Transaction transaction) {
         if (!this.verifyTransaction(transaction)) {
-            throw new IllegalArgumentException("NOT VALID TRANSACTION!");
+            throw new IllegalArgumentException("NOT A VALID TRANSACTION!");
         }
         this.pendingTransactions.add(transaction);
         transaction.setDateReceived(Instant.now().toEpochMilli());
@@ -61,6 +63,10 @@ public class NodeController {
     }
 
     private boolean verifyTransaction(Transaction transaction) {
+        if (!transaction.getFrom().equals(this.walletController.getAddressFromPublicKey(transaction.getSenderPubKey()))
+                && !transaction.getFrom().equals(COIN_GENERATION)) {
+            return false;
+        }
         return this.walletController.verify(Utils.serialize(transaction.getCorePart()), transaction.getSenderSignature(), transaction.getSenderPubKey());
     }
 
@@ -104,30 +110,6 @@ public class NodeController {
     }
 
     // VerifyBlock
-    public boolean verifyBlock(Block block) {
-
-        boolean oldNextIndex = this.getLastBlock().getIndex() + 1 == block.getIndex();
-        boolean oldNewHash = this.getLastBlock().getBlockHash().equals(block.getPrevBlockHash());
-
-        boolean checkTransactionHash = transactionHash(block);
-        boolean checkBlockHash = blockHashChecker(block);
-
-        if (!oldNewHash) {
-            return false;
-        }
-        if (!oldNextIndex) {
-            return false;
-        }
-        if (!checkBlockHash) {
-            return false;
-        }
-        if (!checkTransactionHash) {
-            return false;
-        }
-        return true;
-    }
-
-    // VerifyBlock
     public boolean verifyBlock(Block block, Block previousBlock) {
 
         boolean oldNextIndex = previousBlock.getIndex() + 1 == block.getIndex();
@@ -135,6 +117,7 @@ public class NodeController {
 
         boolean checkTransactionHash = transactionHash(block);
         boolean checkBlockHash = blockHashChecker(block);
+        boolean checkTransactionData = transactionDataChecker(block);
 
         if (!oldNewHash) {
             return false;
@@ -148,6 +131,15 @@ public class NodeController {
         if (!checkTransactionHash) {
             return false;
         }
+        if (!checkTransactionData) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean transactionDataChecker(Block block) {
+        List<Transaction> transactions = block.getTransactions();
+
         return true;
     }
 
@@ -159,9 +151,6 @@ public class NodeController {
 
     private boolean transactionHash(Block block) {
         for (Transaction tr : block.getTransactions()) {
-            if (tr.getTransactionHash().equals("coinBased")) {
-                return true;
-            }
             if (!verifyTransaction(tr)) {
                 return false;
             }
@@ -214,9 +203,10 @@ public class NodeController {
 
     private Transaction createCoinbaseTransaction(String minerAddress) {
         Transaction transaction = new Transaction();
-        transaction.setFrom(this.nodeWallet.getAddress());
+        transaction.setFrom(COIN_GENERATION);
         transaction.setTo(minerAddress);
         transaction.setValue(this.reward);
+        transaction.setDateReceived(Instant.now().getEpochSecond());
 
         transaction = this.walletController.signTransaction(transaction, this.nodeWallet);
         transaction.setTransactionHash(this.getTransactionHash(transaction));

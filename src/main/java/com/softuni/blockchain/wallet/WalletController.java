@@ -46,4 +46,8 @@ public class WalletController {
 
         return transaction;
     }
+
+    public String getAddressFromPublicKey(String publicKey) {
+        return Hex.toHexString(ECKey.fromPublicOnly(Hex.decode(publicKey.getBytes())).getAddress());
+    }
 }
