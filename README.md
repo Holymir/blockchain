@@ -1,7 +1,7 @@
 # Blockchain
 Blockchain Test Network
 
-##Build from source:
+## Build from source:
 
 ````
 ./mvnw install dockerfile:build
