@@ -44,7 +44,7 @@ public class Peer {
         this.session = session;
     }
 
-    @JsonIgnore
+
     public String getSessionId() {
         return sessionId;
     }
@@ -58,12 +58,14 @@ public class Peer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Peer peer = (Peer) o;
-        return Objects.equals(url, peer.url);
+        return Objects.equals(url, peer.url) &&
+                Objects.equals(sessionId, peer.sessionId) &&
+                Objects.equals(uuid, peer.uuid);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(url);
+        return Objects.hash(url, sessionId, uuid);
     }
 }

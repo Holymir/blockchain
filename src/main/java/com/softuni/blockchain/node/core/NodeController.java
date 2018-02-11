@@ -172,6 +172,7 @@ public class NodeController {
         block.setBlockHash("0x" + Hex.toHexString(HashUtil.sha256(Utils.serialize(block).getBytes())));
         block.setDateCreated(0L);
         block.setPrevBlockHash("NONE");
+        block.setTransactions(new ArrayList<>());
         return block;
     }
 

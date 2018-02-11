@@ -115,7 +115,7 @@ public class Block implements Comparable<Block> {
                 ", nonce=" + nonce +
                 ", dateCreated=" + dateCreated +
                 ", blockHash='" + (blockHash == null ? "null" : blockHash.substring(blockHash.length() - 5)) + '\'' +
-                ", Transactions='" + (transactions == null ? "0" : this.transactions.size()) + '\'' +
+                ", Transactions='" + (transactions == null ? "null" : this.transactions.size()) + '\'' +
                 '}';
     }
 

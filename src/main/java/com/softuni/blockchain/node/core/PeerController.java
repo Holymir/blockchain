@@ -56,13 +56,13 @@ public class PeerController {
     }
 
     public void remove(Peer peer) throws IOException {
-        Optional<Peer> any = this.peers.values().stream().filter(a -> a.getUrl().equals(peer.getUrl())).findAny();
-        if (!any.isPresent()) {
-            throw new RuntimeException("Peer not found");
+        peer = this.peers.get(peer.getSessionId());
+        if (peer != null) {
+            peer.getSession().close();
+            this.getPeers().remove(peer.getSessionId());
         }
 
-        any.get().getSession().close();
-        this.getPeers().remove(any.get().getSessionId());
+        throw new RuntimeException("Peer not found");
     }
 
 

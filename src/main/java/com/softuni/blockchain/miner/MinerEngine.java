@@ -19,12 +19,14 @@ public class MinerEngine {
     private static final Logger logger = LoggerFactory.getLogger("MINER_ENGINE");
     private MinerController minerController;
 
+    private String lastMiningJobId;
+
     @Autowired
     public MinerEngine(MinerController minerController) {
         this.minerController = minerController;
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 1_000)
     void run() {
         if (this.minerController.getShouldMine()) {
             RestTemplate restTemplate = new RestTemplate();
@@ -32,11 +34,15 @@ public class MinerEngine {
                     "/mining/get-block/" + this.minerController.getMinerConfig().getWallet(), MiningJob.class);
 
             if (miningJob != null) {
-                Block mined = this.mine(miningJob.getBlock());
+                if (miningJob.getId().equals(lastMiningJobId)) {
+                    return;
 
+                }
+                Block mined = this.mine(miningJob.getBlock());
                 restTemplate = new RestTemplate();
                 restTemplate.postForObject("http://" + minerController.getMinerConfig().getNode()
                         + "/mining/submit-block/" + miningJob.getId(), mined, Block.class);
+                this.lastMiningJobId = miningJob.getId();
             }
         }
     }

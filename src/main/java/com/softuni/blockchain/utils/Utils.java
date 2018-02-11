@@ -16,7 +16,6 @@ public class Utils {
     static {
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
         builder.serializationInclusion(JsonInclude.Include.NON_NULL);
-        builder.serializationInclusion(JsonInclude.Include.NON_EMPTY);
         builder.featuresToEnable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         builder.failOnUnknownProperties(false);
 

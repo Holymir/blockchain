@@ -34,7 +34,7 @@ public class NodeEngine {
         this.nodeController = nodeController;
     }
 
-    @Scheduled(fixedDelay = 5_000)
+    @Scheduled(fixedDelay = 1_000)
     synchronized void run() {
         if (this.nodeController.getUnconfirmedBlocks().size() != 0) {
             this.synchronizeBlockChain();
@@ -152,11 +152,20 @@ public class NodeEngine {
             this.synchronizeBlockChain(tempChain.subList(1, tempChain.size() - 1), new ArrayList<>(Arrays.asList(tempChain.get(0))));
         }
 
-        if (tempChain.size() < blockchain.size()) {
+        if (this.getDifficulty(tempChain) < this.getDifficulty(blockchain)) {
             return blockchain;
         }
 
         return tempChain;
+    }
+
+    private int getDifficulty(List<Block> blocks) {
+        int difficulty = 0;
+        for (Block block : blocks) {
+            difficulty += block.getDifficulty();
+        }
+
+        return difficulty;
     }
 
     private boolean checkConsistency(List<Block> blockchain) {
