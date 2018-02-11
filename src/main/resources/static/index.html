@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="icon" href="../../favicon.ico">-->
+
+    <title>Blockchain Explorer</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- FooTable Bootstrap CSS -->
+    <link href="js/footable.bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <!--<link href="docs/css/docs.css" rel="stylesheet">-->
+
+    <!--<script src="docs/js/demo-rows.js"></script>-->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <link rel="icon" type="image/png" href="favicon-rebel.ico">
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Blockchain Explorer</h1>
+
+    <ul class="nav nav-tabs">
+        <li><a data-toggle="tab" href="#node">Node</a></li>
+        <li class="active"><a data-toggle="tab" href="#blocks">Blocks</a></li>
+        <li><a data-toggle="tab" href="#transactions">Transactions</a></li>
+        <li><a data-toggle="tab" href="#wallet">Wallet</a></li>
+        <li><a data-toggle="tab" href="#miner">Miner</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="node" class="tab-pane fade">
+            <div class="col col-md-6">
+                <h4>Node Stats:</h4>
+                Blocks<span class="pull-right strong">- 15%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"
+                         style="width:15%">15
+                    </div>
+                </div>
+
+                Difficulty <span class="pull-right strong">+ 30%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"
+                         style="width:30%">30%
+                    </div>
+                </div>
+
+                Mining Jobs<span class="pull-right strong">+ 8%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="8" aria-valuemin="0" aria-valuemax="100"
+                         style="width:8%">8%
+                    </div>
+                </div>
+
+                Peers<span class="pull-right strong">+ 8%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="8" aria-valuemin="0" aria-valuemax="100"
+                         style="width:8%">8%
+                    </div>
+                </div>
+
+                Pending Transactions<span class="pull-right strong">+ 8%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="8" aria-valuemin="0" aria-valuemax="100"
+                         style="width:8%">8%
+                    </div>
+                </div>
+            </div>
+
+            <div class="col col-md-6">
+                <h4>Miner Stats:</h4>
+                Visits<span class="pull-right strong">+ 45%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="45"aria-valuemin="0" aria-valuemax="100" style="width:45%">45%</div>
+                </div>
+
+                395 New Users<span class="pull-right strong">+ 57%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="57"aria-valuemin="0" aria-valuemax="100" style="width:57%">57%</div>
+                </div>
+
+                12.593 Downloads<span class="pull-right strong">+ 25%</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25"aria-valuemin="0" aria-valuemax="100" style="width:25%">25%</div>
+                </div>
+            </div>
+        </div>
+        <div id="blocks" class="tab-pane fade in active">
+            <table class="table table-striped"></table>
+        </div>
+        <div id="transactions" class="tab-pane fade">
+            <div></div>
+        </div>
+        <div id="wallet" class="tab-pane fade">
+            <div></div>
+        </div>
+        <div id="miner" class="tab-pane fade">
+            <div></div>
+        </div>
+    </div>
+</div> <!-- /container -->
+
+<!--&lt;!&ndash; IE10 viewport hack for Surface/desktop Windows 8 bug &ndash;&gt;-->
+<!--<script src="docs/js/ie10-viewport-bug-workaround.js"></script>-->
+<!-- Add in any FooTable dependencies we may need -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+<!-- Add in FooTable itself -->
+<script src="js/footable.js"></script>
+<!-- Initialize FooTable -->
+<script>
+    jQuery(function ($) {
+        $('.table').footable({
+            "paging": {
+                "enabled": true
+            },
+            "filtering": {
+                "enabled": true
+            },
+            "sorting": {
+                "enabled": true
+            },
+            "columns": [
+                {
+                    "name": "index",
+                    "title": "Index",
+                    "breakpoints": "xs sm",
+                    "type": "number",
+                    "style": {
+                        "width": 80,
+                        "maxWidth": 80
+                    }
+                },
+                {
+                    "name": "blockHash",
+                    "title": "Block Hash",
+                    "formatter": function (value, options, rowData) {
+                        return "<a data-toggle='tooltip' title=" + value + " data-placement='top' href=#>" + truncate(value, 32) + "</a>";
+                    }
+                },
+                {
+                    "name": "minedBy",
+                    "title": "Mined by"
+                },
+                {
+                    "name": "difficulty",
+                    "title": "Difficulty",
+                    "breakpoints": "xs sm",
+                    "type": "number",
+                    "style": {
+                        "width": 80,
+                        "maxWidth": 80
+                    }
+                },
+                {
+                    "name": "nonce",
+                    "title": "Nonce",
+                    "breakpoints": "xs sm",
+                    "type": "number",
+                    "style": {
+                        "width": 80,
+                        "maxWidth": 80
+                    }
+                },
+                {
+                    "name": "reward",
+                    "title": "Reward",
+                    "breakpoints": "xs sm",
+                    "type": "number",
+                    "style": {
+                        "width": 80,
+                        "maxWidth": 80
+                    }
+                },
+                {
+                    "name": "dateCreated",
+                    "title": "Date Created",
+                    "type": "date",
+                    "breakpoints": "xs sm md",
+                    "formatString": "LTS"
+                }
+            ],
+            "rows": $.get("rows-blocks.json")
+        });
+    });
+
+    var truncate = function (fullStr, strLen, separator) {
+        if (fullStr.length <= strLen) return fullStr;
+
+        separator = separator || '...';
+
+        var sepLen = separator.length,
+            charsToShow = strLen - sepLen,
+            frontChars = Math.ceil(charsToShow / 2),
+            backChars = Math.floor(charsToShow / 2);
+
+        return fullStr.substr(0, frontChars) +
+            separator +
+            fullStr.substr(fullStr.length - backChars);
+    };
+</script>
+</body>
+</html>

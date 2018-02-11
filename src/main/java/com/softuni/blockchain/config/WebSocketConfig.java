@@ -30,7 +30,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
-        webSocketHandlerRegistry.addHandler(myMessageHandler(), "/")
+        webSocketHandlerRegistry.addHandler(myMessageHandler(), "/socket")
                 .setAllowedOrigins("*");
     }
 }

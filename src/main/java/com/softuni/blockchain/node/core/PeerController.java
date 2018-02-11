@@ -43,7 +43,7 @@ public class PeerController {
         WebSocketHandler sessionHandler = new SocketHandler(this, this.nodeController);
 
         ListenableFuture<WebSocketSession> webSocketSessionListenableFuture =
-                webSocketClient.doHandshake(sessionHandler, String.format("ws://%s", peer.getUrl()));
+                webSocketClient.doHandshake(sessionHandler, String.format("ws://%s/socket", peer.getUrl()));
         webSocketSessionListenableFuture.addCallback(webSocketSession -> {
             logger.debug(String.format("Session with id '%s' is open to Peer with address: '%s' added to system.", webSocketSession.getId(), peer.getUrl()));
 
