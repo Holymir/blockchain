@@ -16,10 +16,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -59,8 +56,13 @@ public class PeerController {
     }
 
     public void remove(Peer peer) throws IOException {
-        peer.getSession().close();
-        this.getPeers().remove(peer.getSessionId());
+        Optional<Peer> any = this.peers.values().stream().filter(a -> a.getUrl().equals(peer.getUrl())).findAny();
+        if (!any.isPresent()) {
+            throw new RuntimeException("Peer not found");
+        }
+
+        any.get().getSession().close();
+        this.getPeers().remove(any.get().getSessionId());
     }
 
 

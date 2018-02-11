@@ -1,0 +1,10 @@
+version: '3'
+services:
+  node-a:
+    image: "soft-uni/blockchain:latest"
+    ports:
+     - "8080:8080"
+  node-b:
+    image: "soft-uni/blockchain:latest"
+    ports:
+      - "8090:8080"

@@ -32,7 +32,6 @@ package com.softuni.blockchain.wallet.crypto;
  * limitations under the License.
  */
 
-import com.sun.istack.internal.Nullable;
 import com.softuni.blockchain.wallet.crypto.jce.ECKeyAgreement;
 import com.softuni.blockchain.wallet.crypto.jce.ECKeyFactory;
 import com.softuni.blockchain.wallet.crypto.jce.ECKeyPairGenerator;
@@ -224,7 +223,7 @@ public class ECKey implements Serializable {
      *
      * All private key operations will use the provider.
      */
-    public ECKey(Provider provider, @Nullable PrivateKey privKey, ECPoint pub) {
+    public ECKey(Provider provider, PrivateKey privKey, ECPoint pub) {
         this.provider = provider;
 
         if (privKey == null || isECPrivateKey(privKey)) {
@@ -264,7 +263,7 @@ public class ECKey implements Serializable {
      *
      * BouncyCastle will be used as the Java Security Provider
      */
-    public ECKey(@Nullable BigInteger priv, ECPoint pub) {
+    public ECKey(BigInteger priv, ECPoint pub) {
         this(
                 SpongyCastleProvider.getInstance(),
                 privateKeyFromBigInteger(priv),
@@ -1060,7 +1059,6 @@ public class ECKey implements Serializable {
      * @param messageHash Hash of the data that was signed.
      * @return 65-byte encoded public key
      */
-    @Nullable
     public static byte[] recoverPubBytesFromSignature(int recId, ECDSASignature sig, byte[] messageHash) {
         check(recId >= 0, "recId must be positive");
         check(sig.r.signum() >= 0, "r must be positive");
@@ -1118,7 +1116,6 @@ public class ECKey implements Serializable {
      * @param messageHash Hash of the data that was signed.
      * @return 20-byte address
      */
-    @Nullable
     public static byte[] recoverAddressFromSignature(int recId, ECDSASignature sig, byte[] messageHash) {
         final byte[] pubBytes = recoverPubBytesFromSignature(recId, sig, messageHash);
         if (pubBytes == null) {
@@ -1135,7 +1132,6 @@ public class ECKey implements Serializable {
      * @param messageHash Hash of the data that was signed.
      * @return ECKey
      */
-    @Nullable
     public static ECKey recoverFromSignature(int recId, ECDSASignature sig, byte[] messageHash) {
         final byte[] pubBytes = recoverPubBytesFromSignature(recId, sig, messageHash);
         if (pubBytes == null) {
@@ -1165,7 +1161,6 @@ public class ECKey implements Serializable {
      *
      *  @return  -
      */
-    @Nullable
     public byte[] getPrivKeyBytes() {
         if (privKey == null) {
             return null;
