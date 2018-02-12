@@ -67,11 +67,14 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Peer's address e.g. 'localhost'"
-                                   id="add-peer-input">
-                            <span class="input-group-btn" id="add-peer-button">
-                                <button class="btn btn-default" type="button">Add!</button>
-                            </span>
+                            <input type="text" class="form-control" placeholder="Peer's address e.g. 'localhost'" id="add-peer-input">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li id="add-peer-button"><a  href="#">Add Peer</a></li>
+                                    <li><a href="#">Discover</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
