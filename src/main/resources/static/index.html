@@ -46,15 +46,15 @@
     <h1>Blockchain Explorer</h1>
 
     <ul class="nav nav-tabs">
-        <li><a data-toggle="tab" href="#node">Node</a></li>
-        <li class="active"><a data-toggle="tab" href="#blocks">Blocks</a></li>
+        <li class="active"><a data-toggle="tab" href="#node">Node</a></li>
+        <li><a data-toggle="tab" href="#blocks">Blocks</a></li>
         <li><a data-toggle="tab" href="#transactions">Transactions</a></li>
         <li><a data-toggle="tab" href="#wallet">Wallet</a></li>
         <li><a data-toggle="tab" href="#miner">Miner</a></li>
     </ul>
 
     <div class="tab-content">
-        <div id="node" class="tab-pane fade">
+        <div id="node" class="tab-pane fade in active">
             <div class="col col-md-6">
                 <h4>Node Stats:</h4>
                 <div id="node-info"></div>
@@ -64,9 +64,20 @@
             <div class="col col-md-6">
                 <h4>Peers Stats:</h4>
                 <table class="table table-striped" id="peers-table"></table>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Node's address e.g. 'localhost'"
+                                   id="add-peer-input">
+                            <span class="input-group-btn" id="add-peer-button">
+                                <button class="btn btn-default" type="button">Add!</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="blocks" class="tab-pane fade in active">
+        <div id="blocks" class="tab-pane fade">
             <table class="table table-striped" id="blocks-table"></table>
         </div>
         <div id="transactions" class="tab-pane fade">
@@ -79,6 +90,7 @@
             <div></div>
         </div>
     </div>
+</div>
 </div> <!-- /container -->
 
 <!--&lt;!&ndash; IE10 viewport hack for Surface/desktop Windows 8 bug &ndash;&gt;-->
@@ -175,6 +187,28 @@
             "sorting": {
                 "enabled": true
             },
+            "editing": {
+                "enabled": true,
+                "alwaysShow": true,
+                "deleteRow": function (row) {
+                    if (confirm('Are you sure you want to remove this peer?')) {
+                        var jsonObject = {"sessionId": row.value.sessionId};
+
+                        $.ajax({
+                            type: 'DELETE',
+                            url: 'http://localhost:8080/peers',
+                            data: JSON.stringify(jsonObject),
+                            dataType: "json",
+                            contentType: 'application/json',
+                            cache: false
+                        });
+
+                        row.delete();
+                    }
+                },
+                "allowAdd": false,
+                "allowEdit": false
+            },
             "columns": [
                 {
                     "name": "sessionId",
@@ -216,6 +250,22 @@
             separator +
             fullStr.substr(fullStr.length - backChars);
     };
+
+    $(function () {
+        $('#add-peer-button').click(function () {
+            var peerAddress = $('#add-peer-input').val();
+            var jsonObject = [{"url": peerAddress}];
+
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/peers',
+                data: JSON.stringify(jsonObject),
+                dataType: "json",
+                contentType: 'application/json',
+                cache: false
+            });
+        });
+    });
 </script>
 </body>
 </html>
